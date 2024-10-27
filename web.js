@@ -1,3 +1,5 @@
+//카페24 브랜치 잘확인해야함 카페는  git push --set-upstream origin master
+
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';

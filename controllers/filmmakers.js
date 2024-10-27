@@ -148,7 +148,7 @@ const putEdit = async (req, res) => {
             })
           };
           const response = await axios(options);
-          res.json({message:response.data})
+        //   res.json({message:response.data})
           return response.data
         return
         } catch (error) {
