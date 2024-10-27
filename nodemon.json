@@ -1,0 +1,7 @@
+{
+    "watch": ["", "web.js"],
+    "ext": "js,ts,tsx,json",
+    "ignore": ["node_modules"],
+    "exec": "ts-node web.js"
+  }
+  
