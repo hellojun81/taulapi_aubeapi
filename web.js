@@ -7,7 +7,7 @@ import customersRoutes from './routes/customers.js';
 import scheduleRoutes from './routes/schedules.js';
 import setupRoutes from './routes/setup.js';
 import filmmakersRoutes from './routes/filmmakers.js';
-// import autoschedules from './lib/autoschedules.js';
+import autoschedules from './lib/autoschedules.js';
 
 
 dotenv.config();
@@ -58,7 +58,7 @@ app.use('/api/filmmakers', filmmakersRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/setup', setupRoutes);
 
-// autoschedules.startSchedules();
+autoschedules.startSchedules();
 httpServer.listen(port, () => {
     console.log(`Server started on port ${port}`);
 });
