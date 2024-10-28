@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post('/', filmmakersContoller.getLogin);
 router.get('/', filmmakersContoller.getInfo);
-router.put('/:id', filmmakersContoller.putEdit);
+router.post('/:id', filmmakersContoller.postEdit);
 
 
 export default router;

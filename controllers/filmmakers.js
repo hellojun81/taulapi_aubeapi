@@ -5,30 +5,59 @@ import querystring from 'querystring';
 import { parseDocument } from 'htmlparser2';
 import { selectOne } from 'css-select';
 
-const getLogin = async (req, res) => {
+import { wrapper } from 'axios-cookiejar-support';
+import tough from 'tough-cookie';
+import { parse } from 'set-cookie-parser';
+
+
+
+const getCookiesFromSite = async () => {
+    try {
+        const response = await axios.get('https://www.filmmakers.co.kr', {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+            }
+        });
+
+        // 응답 헤더에서 쿠키 가져오기
+        const cookies = parse(response.headers['set-cookie'], {
+            map: true
+        });
+
+        console.log("Cookies:", cookies.PHPSESSID.value);
+        return  cookies.PHPSESSID.value;
+    } catch (error) {
+        console.error("Error fetching cookies:", error);
+    }
+};
+
+const getLogin = async (cookie) => {
     try {
         const options = {
             method: 'POST',
             url: 'https://www.filmmakers.co.kr/index.php?act=procMemberLogin',
             headers: {
-                'authority': 'www.filmmakers.co.kr',
-                'pragma': 'no-cache',
-                'cache-control': 'no-cache',
-                'sec-ch-ua': '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
-                'sec-ch-ua-mobile': '?0',
-                'sec-ch-ua-platform': '"macOS"',
-                'origin': 'https://www.filmmakers.co.kr',
-                'content-type': 'application/x-www-form-urlencoded',
-                'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-                'sec-fetch-site': 'same-origin',
-                'sec-fetch-mode': 'navigate',
-                'sec-fetch-user': '?1',
-                'sec-fetch-dest': 'document',
-                'referer': 'https://www.filmmakers.co.kr/actorsAudition',
-                'accept-encoding': 'gzip, deflate, br, zstd',
-                'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-                'Cookie': 'PHPSESSID=sqkmf7q4eih0943pbmuc3i41ib; rx_login_status=0hdZNQ5BpjWObrRraaYzy_la'
+                'method': 'POST', 
+                'authority': 'www.filmmakers.co.kr', 
+                'scheme': 'https', 
+                'path': '/index.php?act=procMemberLogin', 
+                'pragma': 'no-cache', 
+                'cache-control': 'no-cache', 
+                'origin': 'https://www.filmmakers.co.kr', 
+                'content-type': 'application/x-www-form-urlencoded', 
+                'upgrade-insecure-requests': '1', 
+                'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36', 
+                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 
+                'sec-fetch-site': 'same-origin', 
+                'sec-fetch-mode': 'navigate', 
+                'sec-fetch-user': '?1', 
+                'sec-fetch-dest': 'document', 
+                'referer': 'https://www.filmmakers.co.kr/actorsAudition', 
+                'accept-encoding': 'gzip, deflate, br, zstd', 
+                'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7', 
+                'priority': 'u=0, i', 
+                'Cookie': 'PHPSESSID='+cookie
             },
             data: querystring.stringify({
                 'error_return_url': '/actorsAudition',
@@ -41,14 +70,18 @@ const getLogin = async (req, res) => {
                 'password': 'h23585858!'
             })
         };
+      
+ 
 
         const response = await axios(options);
         const html = response.data;
+        // console.log(html)
         const document = parseDocument(html);
 
         // CSS 선택자로 요소 선택
         const metaTag = selectOne('meta[name="csrf-token"]', document);
         const csrfToken = metaTag?.attribs?.content;
+        // console.log('getLogin',csrfToken)
         // const $ = cheerio.load(html);
         // const csrfToken = $('meta[name="csrf-token"]').attr('content');
         // res.json({ message: csrfToken });
@@ -56,17 +89,17 @@ const getLogin = async (req, res) => {
 
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).json({ error: 'Failed to log in' });
+        // res.status(500).json({ error: 'Failed to log in' });
     }
 };
 
-const getInfo = async (req, res) => {
+const getInfo = async (cookie) => {
     try {
         const options = {
             method: 'GET',
             url: 'https://www.filmmakers.co.kr/locations/21206554/edit',
             headers: {
-                'Cookie': 'PHPSESSID=sqkmf7q4eih0943pbmuc3i41ib; rx_login_status=0hdZNQ5BpjWObrRraaYzy_la'
+                'Cookie': 'PHPSESSID='+cookie
             }
         };
 
@@ -81,18 +114,17 @@ const getInfo = async (req, res) => {
         const title = inputElement?.attribs?.value;
 
         
-        // console.log({ ContentValue: ContentValue, title: title })
+        console.log({ ContentValue: ContentValue, title: title })
         return { ContentValue: ContentValue, title: title }
     } catch (error) {
         console.error('Error:', error);
     }
 }
 
-const putEdit = async (req, res) => {
-
-    const csrfToken = await getLogin()
-
-    const getInfoVaule = await getInfo()
+const postEdit = async (req, res) => {
+    const getCookies=await getCookiesFromSite()
+    const csrfToken = await getLogin( getCookies)
+    const getInfoVaule = await getInfo(getCookies)
     const ContentValue = getInfoVaule.ContentValue
     const title = getInfoVaule.title
     console.log({'csrfToken':csrfToken,title:title})
@@ -121,7 +153,7 @@ const putEdit = async (req, res) => {
               'accept-encoding': 'gzip, deflate, br, zstd',
               'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
               'priority': 'u=1, i',
-              'Cookie': 'PHPSESSID=sqkmf7q4eih0943pbmuc3i41ib; rx_login_status=0hdZNQ5BpjWObrRraaYzy_la'
+              'Cookie': 'PHPSESSID='+getCookies
             },
             data: querystring.stringify({
               '_filter': 'insert',
@@ -160,5 +192,5 @@ const putEdit = async (req, res) => {
 export default {
     getLogin,
     getInfo,
-    putEdit
+    postEdit
 };
