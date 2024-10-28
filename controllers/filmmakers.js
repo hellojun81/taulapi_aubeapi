@@ -5,8 +5,6 @@ import querystring from 'querystring';
 import { parseDocument } from 'htmlparser2';
 import { selectOne } from 'css-select';
 
-import { wrapper } from 'axios-cookiejar-support';
-import tough from 'tough-cookie';
 import { parse } from 'set-cookie-parser';
 
 
