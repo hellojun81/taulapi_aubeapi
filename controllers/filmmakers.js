@@ -4,55 +4,6 @@ import FormData from 'form-data';
 // import { JSDOM } from 'jsdom';
 import { parseDocument } from 'htmlparser2';
 import { selectOne } from 'css-select';
-// import { parse } from 'set-cookie-parser';
-// import qs from 'qs';
-
-
-// const getCookiesFromSite = async () => {
-//     try {
-//         const response = await axios.get('https://www.filmmakers.co.kr', {
-//             headers: {
-//                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36',
-//                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-//             }
-//         });
-
-//         // 응답 헤더에서 쿠키 가져오기
-//         const cookies = parse(response.headers['set-cookie'], {
-//             map: true
-//         });
-
-//         console.log("Cookies:", cookies);
-//         return cookies.PHPSESSID.value;
-//     } catch (error) {
-//         // console.error("Error fetching cookies:", error);
-//     }
-// };
-// const Logout = async (cookie) => {
-//     try {
-//         const options = {
-//             method: 'GET',
-//             url: 'https://www.filmmakers.co.kr/index/dispMemberLogout',
-//             headers: {
-//                 'Cookie': 'PHPSESSID=' + cookie
-//             }
-//         };
-
-//         const response = await axios(options);
-//         const html = response.data;
-
-//         const document = parseDocument(html);
-//         const metaTag = selectOne('meta[name="csrf-token"]', document);
-//         const csrfToken = metaTag?.attribs?.content;
-
-
-//         // console.log({ logout: csrfToken })
-//         return csrfToken
-//     } catch (error) {
-//         // console.error('Error:', error);
-//     }
-// }
-
 
 const getInfo = async (cookie) => {
     try {
@@ -137,8 +88,8 @@ const getLogin = async () => {
         const getcookie = 'PHPSESSID=' + cookies.PHPSESSID + '; rx_login_status=' + cookies.rx_login_status
         return getcookie;
     } catch (error) {
-         console.error('Login error:', error);
-        return 'Login error:'+error;
+        console.error('Login error:', error);
+        return 'Login error:' + error;
     }
 };
 
@@ -166,11 +117,11 @@ const getCrsfToken = async (cookie) => {
         return csrfToken;
     } catch (error) {
         console.error('getCrsfToken error:', error);
-        return 'getCrsfToken error:'+error;
+        return 'getCrsfToken error:' + error;
     }
 }
 
-const postEdit = async (req, res) => {
+const postEdit = async () => {
 
     const getCookie = await getLogin()
     const CrsfToken = await getCrsfToken(getCookie)
@@ -178,11 +129,10 @@ const postEdit = async (req, res) => {
     const ContentValue = getInfoVaule.ContentValue
     const title = getInfoVaule.title
 
-    console.log({ 'getCookie':getCookie,'CrsfToken': CrsfToken, title: title, ContentValue: ContentValue })
-    let ContentChg=ContentValue.replace(/'/g, '');
-     ContentChg=ContentChg.replace(new RegExp('\n +','g'),'')
-    //  console.log('ContentChg',ContentChg)
-    // return
+    console.log({ 'getCookie': getCookie, 'CrsfToken': CrsfToken, title: title, ContentValue: ContentValue })
+    let ContentChg = ContentValue.replace(/'/g, '');
+    ContentChg = ContentChg.replace(new RegExp('\n +', 'g'), '')
+
     try {
         const options = {
             method: 'POST',
@@ -235,17 +185,17 @@ const postEdit = async (req, res) => {
             }),
             timeout: 20000
         };
-        console.log('options',options)
+        console.log('options', options)
         const response = await axios(options);
 
-        console.log('reponse',response.data.message)
+        console.log('reponse', response.data.message)
         // res.json({ message: response.data })
         console.log(response.data)
         return response.data
- 
+
     } catch (error) {
         console.error('postEdit Error:', error);
-        return 'postEdit Error:'+ error
+        return 'postEdit Error:' + error
     }
 
 }
@@ -256,3 +206,50 @@ export default {
     postEdit
 };
 
+
+
+
+// const getCookiesFromSite = async () => {
+//     try {
+//         const response = await axios.get('https://www.filmmakers.co.kr', {
+//             headers: {
+//                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36',
+//                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+//             }
+//         });
+
+//         // 응답 헤더에서 쿠키 가져오기
+//         const cookies = parse(response.headers['set-cookie'], {
+//             map: true
+//         });
+
+//         console.log("Cookies:", cookies);
+//         return cookies.PHPSESSID.value;
+//     } catch (error) {
+//         // console.error("Error fetching cookies:", error);
+//     }
+// };
+// const Logout = async (cookie) => {
+//     try {
+//         const options = {
+//             method: 'GET',
+//             url: 'https://www.filmmakers.co.kr/index/dispMemberLogout',
+//             headers: {
+//                 'Cookie': 'PHPSESSID=' + cookie
+//             }
+//         };
+
+//         const response = await axios(options);
+//         const html = response.data;
+
+//         const document = parseDocument(html);
+//         const metaTag = selectOne('meta[name="csrf-token"]', document);
+//         const csrfToken = metaTag?.attribs?.content;
+
+
+//         // console.log({ logout: csrfToken })
+//         return csrfToken
+//     } catch (error) {
+//         // console.error('Error:', error);
+//     }
+// }
