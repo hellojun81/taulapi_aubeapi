@@ -178,7 +178,7 @@ const postEdit = async (req, res) => {
     const ContentValue = getInfoVaule.ContentValue
     const title = getInfoVaule.title
 
-    // console.log({ 'getCookie':getCookie,'CrsfToken': CrsfToken, title: title, ContentValue: ContentValue })
+    console.log({ 'getCookie':getCookie,'CrsfToken': CrsfToken, title: title, ContentValue: ContentValue })
     let ContentChg=ContentValue.replace(/'/g, '');
      ContentChg=ContentChg.replace(new RegExp('\n +','g'),'')
     //  console.log('ContentChg',ContentChg)
@@ -235,8 +235,11 @@ const postEdit = async (req, res) => {
             }),
             timeout: 20000
         };
+        console.log('options',options)
         const response = await axios(options);
-        res.json({ message: response.data })
+
+        console.log('reponse',response.data.message)
+        // res.json({ message: response.data })
         console.log(response.data)
         return response.data
  
