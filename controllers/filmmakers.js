@@ -138,7 +138,7 @@ const getLogin = async () => {
         return getcookie;
     } catch (error) {
          console.error('Login error:', error);
-        return null;
+        return 'Login error:'+error;
     }
 };
 
@@ -166,7 +166,7 @@ const getCrsfToken = async (cookie) => {
         return csrfToken;
     } catch (error) {
         console.error('getCrsfToken error:', error);
-        return null;
+        return 'getCrsfToken error:'+error;
     }
 }
 
@@ -239,9 +239,10 @@ const postEdit = async (req, res) => {
         res.json({ message: response.data })
         console.log(response.data)
         return response.data
-        return
+ 
     } catch (error) {
         console.error('postEdit Error:', error);
+        return 'postEdit Error:'+ error
     }
 
 }
