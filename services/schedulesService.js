@@ -4,7 +4,7 @@ import sql from '../lib/sql.js';
 import dayjs from 'dayjs';
 
 const selectqueryinit = `A.id, B.customerName,CONCAT('[', C.title, ']', B.customerName) AS title, A.start,A.end,A.rentPlace,A.startTime,A.endTime,A.userInt,A.estPrice
-    ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,C.bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at
+    ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,C.bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at ,A.ADmedia
     FROM schedules A INNER JOIN Customers B ON A.customerName = B.id  INNER JOIN csKind C ON A.csKind = C.id`
 
 
@@ -22,16 +22,16 @@ const getCustomerID = async (CustomerName) => {
 }
 
 const createSchedule = async (schedule) => {
-    const { calendarId, csKind,ADmedia, NewTitle, start, end, startTime, endTime, userInt, estPrice, gubun, etc, customerName, rentPlace } = schedule;
+    const { calendarId, csKind, ADmedia, NewTitle, start, end, startTime, endTime, userInt, estPrice, gubun, etc, customerName, rentPlace } = schedule;
     const customerId = await getCustomerID(customerName)
     // console.log({start:start,end:end,customerName:customerName,csKind:csKind})
     const CheckSchedule = await GetCheckSchedule(start, end, customerName, csKind)
 
 
-     console.log('CheckSchedulelength', CheckSchedule.length)
+    console.log('CheckSchedulelength', CheckSchedule.length)
     if (CheckSchedule.length === 0) {
-        const query = `INSERT INTO schedules (calendarId, csKind,ADmedia,title, start, end, startTime,endTime, userInt,estPrice,gubun,etc, customerName, rentPlace)VALUES (?, ?, ?, ?, ?, ?,?,?,?,?,?,?,?)`;
-        const result = await sql.executeQuery(query, [calendarId, csKind,ADmedia, NewTitle, start, end, startTime, endTime, userInt, estPrice, gubun, etc, customerId.id, rentPlace]);
+        const query = `INSERT INTO schedules (calendarId, csKind,ADmedia,title, start, end, startTime,endTime, userInt,estPrice,gubun,etc, customerName, rentPlace)VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+        const result = await sql.executeQuery(query, [calendarId, csKind, ADmedia, NewTitle, start, end, startTime, endTime, userInt, estPrice, gubun, etc, customerId.id, rentPlace]);
         return '등록완료'
     } else {
         return start + ' 에 [' + customerName + '] 이미 등록 되어있습니다.'
@@ -93,15 +93,18 @@ const getScheduleByMonth = async (Month, sort) => {
     console.log('sort', sort)
 
     let Sort2 = 'A.start'
+    let Sortby = 'and C.calView=1 ORDER BY A.start, C.id'
+
     let Newselectqueryinit
     Newselectqueryinit = `A.id, B.customerName,CONCAT('[', C.title, ']', B.customerName) AS title, A.start,A.end,A.rentPlace,A.startTime,A.endTime,A.userInt,A.estPrice
-    ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,C.bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at
+    ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,C.bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at ,A.ADmedia
     FROM schedules A INNER JOIN Customers B ON A.customerName = B.id  INNER JOIN csKind C ON A.csKind = C.id`
+
     switch (sort) {
         case "CREATE":
             Sort2 = "A.created_at"
             Newselectqueryinit = `A.id, B.customerName,CONCAT('[', C.title, ']', B.customerName) AS title, A.start,A.end,A.rentPlace,A.startTime,A.endTime,A.userInt,A.estPrice
-    ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,C.bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at as start ,A.created_at as end
+    ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,C.bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at as start ,A.created_at as end , A.ADmedia
     FROM schedules A INNER JOIN Customers B ON A.customerName = B.id  INNER JOIN csKind C ON A.csKind = C.id`
             break;
         case "START":
@@ -110,15 +113,19 @@ const getScheduleByMonth = async (Month, sort) => {
         case "END":
             Sort2 = 'A.end'
             break;
+        case "CREATECNT":
+            Sort2 = "A.created_at"
+            Newselectqueryinit = ` 'time' as category, DATE(A.created_at) AS start, DATE(A.created_at) AS end,A.ADmedia,CONCAT(B.name, '*', COUNT(*), '건') AS title FROM schedules A JOIN ADmedia B ON A.ADmedia = B.keycode`
+            Sortby ='GROUP BY created_at, A.ADmedia ORDER BY created_at, A.ADmedia'
+            break;
     }
-    
+
     if (sort === undefined) {
         Sort2 = 'A.start'
     }
-    const query = `SELECT ${Newselectqueryinit}
-    WHERE LEFT(${Sort2}, 7) BETWEEN '${NewPrevMonth}' AND '${NewNextMonth}'
-    and C.calView='1' ORDER BY A.start, C.id`
+    const query = `SELECT ${Newselectqueryinit}  WHERE LEFT(${Sort2}, 7) BETWEEN '${NewPrevMonth}' AND '${NewNextMonth}' ${Sortby} `
 
+    console.log('querytest', query)
     const result = await sql.executeQuery(query);
     // console.log(result)
     return result;

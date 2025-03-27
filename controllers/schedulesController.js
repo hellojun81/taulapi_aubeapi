@@ -68,10 +68,12 @@ const getScheduleById = async (req, res) => {
 const createSchedule = async (req, res) => {
     try {
         let newSchedule = await chgSchedule(req.body);
+        console.log('chgSchedule_', newSchedule)
+
         if (!newSchedule.calendarId || !newSchedule.NewTitle || !newSchedule.start || !newSchedule.end) {
             return res.status(400).json({ error: 'Required fields are missing' });
         }
-        console.log('newSchedule2', newSchedule)
+        
 
         const createdSchedule = await schedulesService.createSchedule(newSchedule);
         
