@@ -22,7 +22,7 @@ const getCustomerID = async (CustomerName) => {
 }
 
 const createSchedule = async (schedule) => {
-    const { calendarId, csKind, NewTitle, start, end, startTime, endTime, userInt, estPrice, gubun, etc, customerName, rentPlace } = schedule;
+    const { calendarId, csKind,ADmedia, NewTitle, start, end, startTime, endTime, userInt, estPrice, gubun, etc, customerName, rentPlace } = schedule;
     const customerId = await getCustomerID(customerName)
     // console.log({start:start,end:end,customerName:customerName,csKind:csKind})
     const CheckSchedule = await GetCheckSchedule(start, end, customerName, csKind)
@@ -30,8 +30,8 @@ const createSchedule = async (schedule) => {
 
      console.log('CheckSchedulelength', CheckSchedule.length)
     if (CheckSchedule.length === 0) {
-        const query = `INSERT INTO schedules (calendarId, csKind,title, start, end, startTime,endTime, userInt,estPrice,gubun,etc, customerName, rentPlace)VALUES (?, ?, ?, ?, ?, ?,?,?,?,?,?,?,?)`;
-        const result = await sql.executeQuery(query, [calendarId, csKind, NewTitle, start, end, startTime, endTime, userInt, estPrice, gubun, etc, customerId.id, rentPlace]);
+        const query = `INSERT INTO schedules (calendarId, csKind,ADmedia,title, start, end, startTime,endTime, userInt,estPrice,gubun,etc, customerName, rentPlace)VALUES (?, ?, ?, ?, ?, ?,?,?,?,?,?,?,?)`;
+        const result = await sql.executeQuery(query, [calendarId, csKind,ADmedia, NewTitle, start, end, startTime, endTime, userInt, estPrice, gubun, etc, customerId.id, rentPlace]);
         return '등록완료'
     } else {
         return start + ' 에 [' + customerName + '] 이미 등록 되어있습니다.'
@@ -69,10 +69,8 @@ const getcsByDate = async (startDate, endDate, customerName, csKind) => {
     let query
     if (csKind == 0) {
         query = `SELECT ${selectqueryinit} WHERE A.created_at >= '${startDate} 00:00:00' AND A.created_at <= '${endDate} 23:59:59' and ( B.customerName like '%${customerName}%' or  A.etc like '%${customerName}%' )`;
-
     } else {
         query = `SELECT ${selectqueryinit} WHERE A.created_at >= '${startDate} 00:00:00' AND A.created_at <= '${endDate} 23:59:59' and ( B.customerName like '%${customerName}%' or  A.etc like '%${customerName}%') and A.csKind = ${parseInt(csKind)} `;
-
     }
     const result = await sql.executeQuery(query);
     return result;
@@ -113,7 +111,7 @@ const getScheduleByMonth = async (Month, sort) => {
             Sort2 = 'A.end'
             break;
     }
-    // console.log('sort', Sort2)
+    
     if (sort === undefined) {
         Sort2 = 'A.start'
     }

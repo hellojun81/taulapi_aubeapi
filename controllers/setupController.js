@@ -24,12 +24,17 @@ const getSetupID = async (req, res) => {
         switch (id) {
             case 'sales':
                 result = await setupService.getTotalSales(SearchMonth);
-                console.log('getSetupID', result)
+                console.log('sales', result)
                 break;
 
             case 'csKind':
             result = await setupService.getSetupID('csKind');
-                console.log('getSetupID', result)
+                console.log('csKind', result)
+                break;
+            case 'ADmedia':
+            result = await setupService.getSetupID('ADmedia');
+                console.log('ADmedia', result)
+                break;
         }
 
         if (result) {
