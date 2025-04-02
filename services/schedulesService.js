@@ -4,8 +4,8 @@ import sql from '../lib/sql.js';
 import dayjs from 'dayjs';
 
 const selectqueryinit = `A.id, B.customerName,CONCAT('[', C.title, ']', B.customerName) AS title, A.start,A.end,A.rentPlace,A.startTime,A.endTime,A.userInt,A.estPrice
-    ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,C.bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at ,A.ADmedia
-    FROM schedules A INNER JOIN Customers B ON A.customerName = B.id  INNER JOIN csKind C ON A.csKind = C.id`
+    ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,C.bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at ,A.ADmedia,D.name
+    FROM schedules A INNER JOIN Customers B ON A.customerName = B.id  INNER JOIN csKind C ON A.csKind = C.id INNER JOIN ADmedia D ON A.ADmedia=D.keycode`
 
 
 
@@ -68,6 +68,7 @@ const getcsByDate = async (startDate, endDate, customerName, csKind) => {
     console.log('getcsByDate', typeof parseInt(csKind))
     let query
     if (csKind == 0) {
+      
         query = `SELECT ${selectqueryinit} WHERE A.created_at >= '${startDate} 00:00:00' AND A.created_at <= '${endDate} 23:59:59' and ( B.customerName like '%${customerName}%' or  A.etc like '%${customerName}%' )`;
     } else {
         query = `SELECT ${selectqueryinit} WHERE A.created_at >= '${startDate} 00:00:00' AND A.created_at <= '${endDate} 23:59:59' and ( B.customerName like '%${customerName}%' or  A.etc like '%${customerName}%') and A.csKind = ${parseInt(csKind)} `;
@@ -115,7 +116,7 @@ const getScheduleByMonth = async (Month, sort) => {
             break;
         case "CREATECNT":
             Sort2 = "A.created_at"
-            Newselectqueryinit = ` 'time' as category, DATE(A.created_at) AS start, DATE(A.created_at) AS end,A.ADmedia,CONCAT(B.name, '*', COUNT(*), '건') AS title FROM schedules A JOIN ADmedia B ON A.ADmedia = B.keycode`
+            Newselectqueryinit = ` 'time' as category, DATE(A.created_at) AS start, DATE(A.created_at) AS end,A.ADmedia,CONCAT(B.name, '*', COUNT(*), '건') AS title FROM schedules A JOIN ADmedia B ON A.ADmedia = B.keycode JOIN csKind C ON C.id=1  and A.csKind=C.id `
             Sortby ='GROUP BY created_at, A.ADmedia ORDER BY created_at, A.ADmedia'
             break;
     }
