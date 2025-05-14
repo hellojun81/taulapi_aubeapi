@@ -1,6 +1,6 @@
 // routes/schedules.js
 import express from 'express';
-import schedulesController from '../controllers/schedulesController.js';
+import schedulesController from '../../controllers/crm/schedulesController.js';
 
 const router = express.Router();
 

@@ -1,5 +1,5 @@
 // controllers/customersController.js
-import customersService from '../services/customersService.js';
+import customersService from '../../services/crm/customersService.js';
 
 
 

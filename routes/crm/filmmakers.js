@@ -1,5 +1,5 @@
  import express from 'express';
- import filmmakersContoller from '../controllers/filmmakers.js';
+ import filmmakersContoller from '../../controllers/crm/filmmakers.js';
 
 const router = express.Router();
 

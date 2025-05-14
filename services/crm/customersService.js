@@ -1,5 +1,5 @@
 // services/customersService.js
-import sql from '../lib/sql.js';
+import sql from '../../lib/crm/sql.js';
 import dayjs from 'dayjs';
 
 // 모든 고객 가져오기

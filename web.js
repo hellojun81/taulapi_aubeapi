@@ -4,13 +4,15 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import http from 'http';
-import sql from './lib/sql.js';
-import customersRoutes from './routes/customers.js';
-import scheduleRoutes from './routes/schedules.js';
-import setupRoutes from './routes/setup.js';
-import filmmakersRoutes from './routes/filmmakers.js';
-import autoschedules from './lib/autoschedules.js';
-
+import sql from './lib/crm/sql.js';
+import customersRoutes from './routes/crm/customers.js';
+import scheduleRoutes from './routes/crm/schedules.js';
+import setupRoutes from './routes/crm/setup.js';
+import filmmakersRoutes from './routes/crm/filmmakers.js';
+import autoschedules from './lib/crm/autoschedules.js';
+import adPerformanceRouter from './routes/ad-api/adPerformanceRoute.js';
+import AdRoutes from './routes/ad-api/AdRoutes.js';
+import './scheduler/ad-api/dailyCollector.js'; 
 
 dotenv.config();
 const app = express();
@@ -27,7 +29,7 @@ app.use(express.json());
 app.get('/', (req, res) => {
     res.json('welcome aubeCrm ^^')
 })
-
+app.use(AdRoutes); // ✅ 여기서 경로 붙이기
 
 app.get('/login', async (req, res) => {
     try {

@@ -1,6 +1,6 @@
 
 // services/schedulesService.js
-import sql from '../lib/sql.js';
+import sql from '../../lib/crm/sql.js';
 
 const getAllSetup = async () => {
     const query = 'SELECT * FROM schedules';

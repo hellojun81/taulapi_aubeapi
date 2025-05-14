@@ -1,5 +1,5 @@
 // controllers/schedulesController.js
-import setupService from '../services/setupService.js';
+import setupService from '../../services/crm/setupService.js';
 
 // 모든 setup 가져오기
 const getAllsetup = async (req, res) => {

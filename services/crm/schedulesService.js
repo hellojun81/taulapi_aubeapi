@@ -1,6 +1,6 @@
 
 // services/schedulesService.js
-import sql from '../lib/sql.js';
+import sql from '../../lib/crm/sql.js';
 import dayjs from 'dayjs';
 
 const selectqueryinit = `A.id, B.customerName,CONCAT('[', C.title, ']', B.customerName) AS title, A.start,A.end,A.rentPlace,A.startTime,A.endTime,A.userInt,A.estPrice
