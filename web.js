@@ -1,5 +1,4 @@
 //카페24 브랜치 잘확인해야함 카페는  git push --set-upstream origin master
-
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -9,10 +8,11 @@ import customersRoutes from './routes/crm/customers.js';
 import scheduleRoutes from './routes/crm/schedules.js';
 import setupRoutes from './routes/crm/setup.js';
 import filmmakersRoutes from './routes/crm/filmmakers.js';
-import autoschedules from './lib/crm/autoschedules.js';
+import autoschedules from './scheduler/crm/autoschedules.js';
 import adPerformanceRouter from './routes/ad-api/adPerformanceRoute.js';
 import AdRoutes from './routes/ad-api/AdRoutes.js';
 import './scheduler/ad-api/dailyCollector.js'; 
+// import db from './lib/crm/sql.js'; // db import (경로는 프로젝트 구조에 맞게 조정)
 
 dotenv.config();
 const app = express();
@@ -29,8 +29,8 @@ app.use(express.json());
 app.get('/', (req, res) => {
     res.json('welcome aubeCrm ^^')
 })
-app.use(AdRoutes); // ✅ 여기서 경로 붙이기
 
+app.use(AdRoutes); // ✅ 여기서 경로 붙이기
 app.get('/login', async (req, res) => {
     try {
         // 쿼리 파라미터에서 id와 pw를 가져옴
@@ -56,11 +56,25 @@ app.get('/login', async (req, res) => {
     }
 });
 
-
 app.use('/api/customers', customersRoutes);
 app.use('/api/filmmakers', filmmakersRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/setup', setupRoutes);
+
+// app.get('/api/ad-spend', async (req, res) => {
+//   const { year, month } = req.query;
+//   const formattedMonth = String(month).padStart(2, '0');
+//   const datePrefix = `${year}-${formattedMonth}`;
+
+//   const results = await sql.executeQuery(`
+//     SELECT date, SUM(spend),platform as spend
+//     FROM AdPerformance
+//     WHERE date LIKE '${datePrefix}%'
+//     GROUP BY date
+//     ORDER BY date ASC
+//   `);
+//   res.json(results);
+// });
 
 autoschedules.startSchedules();
 httpServer.listen(port, () => {

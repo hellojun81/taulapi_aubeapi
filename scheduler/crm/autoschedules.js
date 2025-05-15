@@ -2,31 +2,37 @@ import cron from 'node-cron';
 import mysql from 'mysql2/promise';
 import filmmakersContoller from '../../controllers/crm/filmmakers.js';
 
-// MySQL 데이터베이스 연결 설정
+// // MySQL 데이터베이스 연결 설정
+// const pool = mysql.createPool({
+//     host: process.env.DB_HOST || 'taulftp.mycafe24.com',
+//     user: process.env.DB_USER || 'taulftp',
+//     password: process.env.DB_PASSWORD || 'dkffjqb@82',
+//     database: process.env.DB_NAME || 'taulftp',
+//     port: "3306",
+//     multipleStatements: true,
+//     connectionLimit: 10 // 풀 내에서 최대 10개의 연결을 허용
+// });
 const pool = mysql.createPool({
-    host: process.env.DB_HOST || 'taulftp.mycafe24.com',
-    user: process.env.DB_USER || 'taulftp',
-    password: process.env.DB_PASSWORD || 'dkffjqb@82',
-    database: process.env.DB_NAME || 'taulftp',
-    port: "3306",
-    multipleStatements: true,
-    connectionLimit: 10 // 풀 내에서 최대 10개의 연결을 허용
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: parseInt(process.env.DB_CONN_LIMIT || '10', 10),
 });
-
 
 //////0327 10분간격으로 실행하다록 설정
 const executeScheduledTasks = async () => {
     const now = new Date();
     const currentHour = now.getHours();  // 현재 시간
     const currentMinute = now.getMinutes();
-    console.log(now + '/' + currentMinute + ' 자동 스케쥴러10분가격으로 실행')
+    // console.log(now + '/' + currentMinute + ' 자동 스케쥴러10분가격으로 실행')
     // 분이 10의 배수가 아닌 경우 리턴
     // 3, 5, 10 중에서 랜덤으로 하나 선택
     const intervals = [10];
     const randomInterval = intervals[Math.floor(Math.random() * intervals.length)];
-
-    console.log(`Random interval: ${randomInterval}`);
-
+    
+    // console.log(`Random interval: ${randomInterval}`);
     if (currentMinute % randomInterval !== 0) {
         return; // 조건에 맞지 않으면 실행하지 않음
     }
@@ -42,7 +48,6 @@ const executeScheduledTasks = async () => {
             [currentHour, currentMinute]
         );
         // 현재 시간에 맞는 작업 실행
-
         for (const job of rows) {
             const taskDescription = job.task_description.toString(); // 버퍼를 문자열로 변환
             console.log(`Executing job: ${job.task_description} at ${currentHour}:00`);
@@ -73,8 +78,6 @@ const resetJobsTable = async () => {
 
 // 스케줄러 설정
 const startSchedules = async () => {
-
-
     // 매 시간마다 00분에 실행되는 작업 스케줄러
     // cron.schedule('0 * * * *', executeScheduledTasks);
     ///0327업데이트 매분마다 실행

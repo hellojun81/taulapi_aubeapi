@@ -7,8 +7,7 @@ import { fetchNaverAds } from '../../services/ad-api/naverSearch.js';
 // import { getGoogleAdDataForDate } from '../services/ads/google.js';
 // import { getInstagramAdDataForDate } from '../services/ads/instagram.js';
 // import { getTiktokAdDataForDate } from '../services/ads/tiktok.js';
-  const date = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
-
+const date = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
 const PLATFORMS = [
   { name: 'meta', fetcher: (date) => fetchMetaAds('meta', date, date) },
   { name: 'naver',  fetcher: (date) => fetchNaverAds( date, date) },
@@ -16,11 +15,8 @@ const PLATFORMS = [
 ];
 
 
-
-
-
 // cron.schedule('0 0 * * *', async () => {
-cron.schedule('0 0 * * *', async () => {
+cron.schedule('0 5 * * *', async () => {
   const date = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
 
 
