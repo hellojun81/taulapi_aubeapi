@@ -61,20 +61,7 @@ app.use('/api/filmmakers', filmmakersRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/setup', setupRoutes);
 
-// app.get('/api/ad-spend', async (req, res) => {
-//   const { year, month } = req.query;
-//   const formattedMonth = String(month).padStart(2, '0');
-//   const datePrefix = `${year}-${formattedMonth}`;
 
-//   const results = await sql.executeQuery(`
-//     SELECT date, SUM(spend),platform as spend
-//     FROM AdPerformance
-//     WHERE date LIKE '${datePrefix}%'
-//     GROUP BY date
-//     ORDER BY date ASC
-//   `);
-//   res.json(results);
-// });
 
 autoschedules.startSchedules();
 httpServer.listen(port, () => {
