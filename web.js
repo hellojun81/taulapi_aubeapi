@@ -33,6 +33,7 @@ app.get('/', (req, res) => {
 app.use(AdRoutes); // ✅ 여기서 경로 붙이기
 app.get('/login', async (req, res) => {
     try {
+        console.log('process.env.DB_HOST',process.env.DB_HOST)
         // 쿼리 파라미터에서 id와 pw를 가져옴
         const { id, pw } = req.query;
         // id 또는 pw가 존재하지 않을 경우 처리
