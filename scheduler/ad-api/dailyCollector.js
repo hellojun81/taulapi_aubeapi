@@ -34,25 +34,10 @@ console.log({
       if (!Array.isArray(dataList)) {
         throw new Error(`[${name}] fetcher did not return a valid array`);
       }
-
-      // await saveAdPerformanceList(dataList);
   
     } catch (err) {
       console.error(`❌ [${name}] error:`, err);
     }
   })
 );
-
-  // await Promise.all(
-  //   PLATFORMS.map(async ({ name, fetcher }) => {
-  //     try {
-        
-  //       const data = await fetcher(date);
-  //       await saveAdPerformanceList(data);
-  //       console.log(`✅ [${name}] insert complete (${data.length} rows)`);
-  //     } catch (err) {
-  //       console.error(`❌ [${name}] error:`, err);
-  //     }
-  //   })
-  // );
 });

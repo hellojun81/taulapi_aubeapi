@@ -14,8 +14,6 @@ router.post('/meta-ad/start', startMetaAd);
 // 광고 상태 확인
 router.get('/meta-ad/status', getMetaAdStatus);
 
-
-
 router.post('/ad-register/insert', async (req, res) => {
   const { platform } = req.body;
   const { sinceDate } = req.body;

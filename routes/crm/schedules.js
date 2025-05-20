@@ -14,7 +14,7 @@ router.post('/', schedulesController.createSchedule);
 router.get('/:id', schedulesController.getScheduleById);
 
 // PUT 요청: 특정 스케줄 수정
-router.put('/:id', schedulesController.updateSchedule);
+router.put('/:id', schedulesController.updateSchedule); 
 
 // DELETE 요청: 특정 스케줄 삭제
 router.delete('/:id', schedulesController.deleteSchedule);

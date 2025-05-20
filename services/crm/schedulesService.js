@@ -167,7 +167,7 @@ const getScheduleByMonth = async (Month, sort) => {
 if (sort === "CREATECNT") {
   // ✅ sort가 "cnt"인 경우
   const datePrefix = `${year}-${month}`;
-  query = `(
+  query=`(
   -- 일정 데이터
   SELECT  
     'time' AS category,
@@ -179,57 +179,116 @@ if (sort === "CREATECNT") {
   FROM schedules A
   JOIN ADmedia B ON A.ADmedia = B.keycode
   JOIN csKind C ON C.id = 1 AND A.csKind = C.id
-  WHERE   LEFT(A.created_at, 7) = '${datePrefix}'
+  WHERE LEFT(A.created_at, 7) = '${datePrefix}'
   GROUP BY DATE(A.created_at), A.ADmedia
 )
+
 UNION ALL
+
 (
-  -- 날짜별 총 광고비
+  -- 날짜별 총 광고비, 클릭수, CPC
   SELECT  
     'time' AS category,
     date AS start,
     date AS end,
     NULL AS ADmedia,
     NULL AS dummy,
-    CONCAT('총 광고비: ', FORMAT(SUM(spend), 0), '원') AS title
+          CONCAT(
+      '총광고비:', FORMAT(SUM(spend), 0), '원', CHAR(10),
+      '총클릭수:', FORMAT(SUM(clicks), 0), '회', CHAR(10),
+      'CPC:',
+        CASE 
+          WHEN SUM(clicks) > 0 THEN FORMAT(SUM(spend) / SUM(clicks), 0)
+          ELSE '0'
+        END, '원'
+    ) AS title
   FROM AdPerformance
   WHERE LEFT(date, 7) = '${datePrefix}'
   GROUP BY date
 )
+
 ORDER BY 
   start,
   CASE category
     WHEN 'time' THEN 0
     WHEN 'summary' THEN 1
   END;
-`;
+`
+//   query = `(
+//   -- 일정 데이터
+//   SELECT  
+//     'time' AS category,
+//     DATE(A.created_at) AS start,
+//     DATE(A.created_at) AS end,
+//     A.ADmedia,
+//     NULL AS dummy,
+//     CONCAT(B.name, '*', COUNT(*), '건') AS title
+//   FROM schedules A
+//   JOIN ADmedia B ON A.ADmedia = B.keycode
+//   JOIN csKind C ON C.id = 1 AND A.csKind = C.id
+//   WHERE   LEFT(A.created_at, 7) = '${datePrefix}'
+//   GROUP BY DATE(A.created_at), A.ADmedia
+// )
+// UNION ALL
+// (
+//   -- 날짜별 총 광고비
+//   SELECT  
+//     'time' AS category,
+//     date AS start,
+//     date AS end,
+//     NULL AS ADmedia,
+//     NULL AS dummy,
+//     CONCAT('총 광고비: ', FORMAT(SUM(spend), 0), '원') AS title
+//   FROM AdPerformance
+//   WHERE LEFT(date, 7) = '${datePrefix}'
+//   GROUP BY date
+// )
+// ORDER BY 
+//   start,
+//   CASE category
+//     WHEN 'time' THEN 0
+//     WHEN 'summary' THEN 1
+//   END;
+// `;
 } else if (sort === "ADSPEND") {
   // ✅ sort가 "ADSPEND"인 경우 (총 광고비 합계 출력)
 const datePrefix = `${year}-${month}`;
-   query = `
-  SELECT 
-  'time' AS category,
-  date AS start,
-  date AS end,
-  platform,
-  CONCAT(platform, ': ', FORMAT(SUM(spend), 0)) AS title
+ query = `
+  SELECT
+    'time' AS category,
+    date AS start,
+    date AS end,
+    platform,
+    CONCAT(
+      platform, ': ',
+      FORMAT(SUM(spend), 0), '원 / 클릭수: ',
+      FORMAT(SUM(clicks), 0), ' / CPC: ',
+      FORMAT(SUM(spend) / NULLIF(SUM(clicks), 0), 0), '원'
+    ) AS title
   FROM AdPerformance
   WHERE LEFT(date, 7) = '${datePrefix}'
   GROUP BY date, platform
 
   UNION ALL
 
-  SELECT 
-  'time' AS category,
-  date AS start,
-  date AS end,
-  'TOTAL' AS platform,
-  CONCAT('TOTAL', ': ', FORMAT(SUM(spend), 0)) AS title
+  SELECT
+    'time' AS category,
+    date AS start,
+    date AS end,
+    'TOTAL' AS platform,
+    CONCAT(
+      'TOTAL: ',
+      FORMAT(SUM(spend), 0), '원 / 클릭수: ',
+      FORMAT(SUM(clicks), 0), ' / CPC: ',
+      FORMAT(SUM(spend) / NULLIF(SUM(clicks), 0), 0), '원'
+    ) AS title
   FROM AdPerformance
   WHERE LEFT(date, 7) = '${datePrefix}'
-  GROUP BY start
+  GROUP BY date
+
   ORDER BY start ASC, platform ASC
 `;
+
 } else {
   // ✅ 그 외 경우 (기본 쿼리)
   query = `SELECT ${Newselectqueryinit}
