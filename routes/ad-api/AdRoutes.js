@@ -19,7 +19,7 @@ router.post('/ad-register/insert', async (req, res) => {
   const { sinceDate } = req.body;
   const { untilDate } = req.body;
   let result; // let으로 선언해줘야 case 안에서 할당 가능
-
+ console.log('platform',platform)
   switch (platform) {
     case 'meta':
       result = await fetchMetaAds('meta',sinceDate,untilDate);
@@ -38,7 +38,7 @@ router.post('/ad-register/insert', async (req, res) => {
       console.log('❓ 알 수 없는 플랫폼:', platform);
       return res.status(400).json({ success: false, error: '지원하지 않는 플랫폼' });
   }
-
+ console.log('start /ad-register/insert',result)
 res.json(result)
   
 // res.json(result)

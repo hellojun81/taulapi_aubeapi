@@ -1,36 +1,39 @@
 // fetchNaverAds.js
-import 'dotenv/config';
-import axios from 'axios';
-import crypto from 'crypto';
-import { insertAdPerformance, recordExists } from '../../lib/ad-api/adPerformanceRepo.js';
-import { calculateDerivedMetrics } from '../../lib/ad-api/calculateDerivedMetrics.js';
+import "dotenv/config";
+import axios from "axios";
+import crypto from "crypto";
+import {
+  insertAdPerformance,
+  recordExists,
+} from "../../lib/ad-api/adPerformanceRepo.js";
+import { calculateDerivedMetrics } from "../../lib/ad-api/calculateDerivedMetrics.js";
 
-const BASE_URL = 'https://api.searchad.naver.com';
+const BASE_URL = "https://api.searchad.naver.com";
 const API_KEY = process.env.NAVER_ACCESS_LICENSE;
 const SECRET_KEY = process.env.NAVER_SECRET_KEY;
 const CUSTOMER_ID = process.env.NAVER_CUSTOMER_ID;
 // 배열이면 첫 번째 값, 아니면 그대로, 없으면 기본값 반환
-const safeLabel = (value, fallback = '(unknown)') => {
+const safeLabel = (value, fallback = "(unknown)") => {
   if (Array.isArray(value)) return value[0] ?? fallback;
-  if (typeof value === 'string') return value;
+  if (typeof value === "string") return value;
   return fallback;
 };
 function generateSignature(timestamp, method, uri, secretKey) {
   const message = `${timestamp}.${method}.${uri}`;
-  const hmac = crypto.createHmac('sha256', Buffer.from(secretKey, 'utf-8'));
+  const hmac = crypto.createHmac("sha256", Buffer.from(secretKey, "utf-8"));
   hmac.update(message);
-  return hmac.digest('base64');
+  return hmac.digest("base64");
 }
 
 function getHeaders(method, uri) {
   const timestamp = Date.now().toString();
   const signature = generateSignature(timestamp, method, uri, SECRET_KEY);
   return {
-    'Content-Type': 'application/json; charset=UTF-8',
-    'X-Timestamp': timestamp,
-    'X-API-KEY': API_KEY,
-    'X-Customer': CUSTOMER_ID,
-    'X-Signature': signature,
+    "Content-Type": "application/json; charset=UTF-8",
+    "X-Timestamp": timestamp,
+    "X-API-KEY": API_KEY,
+    "X-Customer": CUSTOMER_ID,
+    "X-Signature": signature,
   };
 }
 
@@ -40,8 +43,8 @@ function getDateRangeList(since, until) {
   const end = new Date(until);
   while (current <= end) {
     const yyyy = current.getFullYear();
-    const mm = String(current.getMonth() + 1).padStart(2, '0');
-    const dd = String(current.getDate()).padStart(2, '0');
+    const mm = String(current.getMonth() + 1).padStart(2, "0");
+    const dd = String(current.getDate()).padStart(2, "0");
     dates.push(`${yyyy}-${mm}-${dd}`);
     current.setDate(current.getDate() + 1);
   }
@@ -49,15 +52,17 @@ function getDateRangeList(since, until) {
 }
 
 async function fetchCampaigns() {
-  const uri = '/ncc/campaigns';
-  const method = 'GET';
-  const res = await axios.get(BASE_URL + uri, { headers: getHeaders(method, uri) });
+  const uri = "/ncc/campaigns";
+  const method = "GET";
+  const res = await axios.get(BASE_URL + uri, {
+    headers: getHeaders(method, uri),
+  });
   return res.data;
 }
 
 async function fetchAdGroupsByCampaign(campaignId) {
-  const uri = '/ncc/adgroups';
-  const method = 'GET';
+  const uri = "/ncc/adgroups";
+  const method = "GET";
   const res = await axios.get(BASE_URL + uri, {
     headers: getHeaders(method, uri),
     params: { nccCampaignId: campaignId },
@@ -66,8 +71,8 @@ async function fetchAdGroupsByCampaign(campaignId) {
 }
 
 async function fetchKeywords(adGroupId) {
-  const uri = '/ncc/keywords';
-  const method = 'GET';
+  const uri = "/ncc/keywords";
+  const method = "GET";
   const res = await axios.get(BASE_URL + uri, {
     headers: getHeaders(method, uri),
     params: { nccAdgroupId: adGroupId },
@@ -76,8 +81,8 @@ async function fetchKeywords(adGroupId) {
 }
 
 async function fetchAds(adGroupId) {
-  const uri = '/ncc/ads';
-  const method = 'GET';
+  const uri = "/ncc/ads";
+  const method = "GET";
   const res = await axios.get(BASE_URL + uri, {
     headers: getHeaders(method, uri),
     params: { nccAdgroupId: adGroupId },
@@ -87,29 +92,39 @@ async function fetchAds(adGroupId) {
 }
 
 async function fetchStats(ids, dateRange) {
-  const uri = '/stats';
-  const method = 'GET';
+  const uri = "/stats";
+  const method = "GET";
+   console.log({'ids':ids,'dateRange':dateRange,'uri':uri,'method':method})
   try {
     const res = await axios.get(BASE_URL + uri, {
       headers: getHeaders(method, uri),
       params: {
-        ids: ids.join(','),
+        ids: ids.join(","),
         fields: JSON.stringify([
-          'impCnt', 'clkCnt', 'cpc', 'ctr', 'ccnt', 'salesAmt', 'crto'
+          "impCnt",
+          "clkCnt",
+          "cpc",
+          "ctr",
+          "ccnt",
+          "salesAmt",
+          "crto",
         ]),
         timeRange: JSON.stringify(dateRange),
       },
     });
-    // if(ids=='nad-a001-06-000000314459798'){
-      // console.log('result',res.data.data)
-    
+    // console.log({ 'ids': ids });
+//    if (ids.includes("nkw-a001-01-000006335890611")) {
+//   console.log("newresult", res.data.data);
+// }
     return res.data.data;
   } catch (err) {
-    console.error(`❌ fetchStats error (${dateRange.since}):`, err.response?.data || err.message);
+    console.error(
+      `❌ fetchStats error (${dateRange.since}):`,
+      err.response?.data || err.message
+    );
     return [];
   }
 }
-
 
 export async function fetchNaverAds(sinceDate, untilDate) {
   const campaigns = await fetchCampaigns();
@@ -122,7 +137,7 @@ export async function fetchNaverAds(sinceDate, untilDate) {
   for (const campaign of campaigns) {
     const campaignId = campaign.nccCampaignId;
     const campaignName = campaign.name;
-    const isPlaceCampaign = campaign.campaignTp === 'PLACE';
+    const isPlaceCampaign = campaign.campaignTp === "PLACE";
 
     const adGroups = await fetchAdGroupsByCampaign(campaignId);
 
@@ -144,13 +159,12 @@ export async function fetchNaverAds(sinceDate, untilDate) {
       });
 
       for (const date of dateList) {
-        // console.log('unitIds',unitIds)
+        // console.log({'unitIds':unitIds,'date':date})
         const stats = await fetchStats(unitIds, { since: date, until: date });
-
+        // console.log("stats", stats);
         for (const s of stats) {
-
-          const rawLabel = idMap[s.id];  // 배열 or 문자열 or undefined 가능
-  const label = safeLabel(rawLabel);  // ✅ 안전화
+          const rawLabel = idMap[s.id]; // 배열 or 문자열 or undefined 가능
+          const label = safeLabel(rawLabel); // ✅ 안전화
 
           // const label = idMap[s.id] || '(unknown)';
           const clicks = s.clkCnt;
@@ -160,7 +174,7 @@ export async function fetchNaverAds(sinceDate, untilDate) {
           // }
           //  console.log('stats',s)
           const record = calculateDerivedMetrics({
-            platform: 'naver',
+            platform: "naver",
             date,
             campaignId,
             campaignName,
@@ -185,15 +199,15 @@ export async function fetchNaverAds(sinceDate, untilDate) {
             device: undefined,
             image_url: null,
           });
-    //  console.table(record);  
-          if(s.id==='nad-a001-06-000000314459815'){
-          console.table(record);  // 콘솔 테이블 형태 출력 (단순 key-value 확인 시)
+          //  console.table(record);
+          if (s.id === "nad-a001-06-000000314459815") {
+            console.table(record); // 콘솔 테이블 형태 출력 (단순 key-value 확인 시)
           }
           const exists = await recordExists(record);
           if (!exists) {
             await insertAdPerformance(record);
             inserted++;
-              // console.log(`✅ 저장됨:naver ${s.id}`);
+            // console.log(`✅ 저장됨:naver ${s.id}`);
           } else {
             skipped++;
             skippedIds.push(`${s.id}_${date}`);

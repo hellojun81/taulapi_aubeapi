@@ -7,6 +7,7 @@ import { fetchNaverAds } from '../../services/ad-api/naverSearch.js';
 // import { getGoogleAdDataForDate } from '../services/ads/google.js';
 // import { getInstagramAdDataForDate } from '../services/ads/instagram.js';
 // import { getTiktokAdDataForDate } from '../services/ads/tiktok.js';
+
 const date = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
 const PLATFORMS = [
   { name: 'meta', fetcher: (date) => fetchMetaAds('meta', date, date) },

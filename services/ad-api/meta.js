@@ -12,7 +12,7 @@ export async function fetchMetaAds(platform, sinceDate, untilDate) {
   const skippedIds = [];
   const AD_ACCOUNT_ID =
     platform === 'meta' ? process.env.META_AD_ACCOUNT_ID : process.env.INSTA_AD_ACCOUNT_ID;
-
+console.log('AD_ACCOUNT_ID',AD_ACCOUNT_ID)
   const insightsUrl = `https://graph.facebook.com/v19.0/act_${AD_ACCOUNT_ID}/insights`;
   const insightsParams = {
     access_token: ACCESS_TOKEN,
@@ -40,10 +40,10 @@ export async function fetchMetaAds(platform, sinceDate, untilDate) {
     time_increment: 1,
     limit: 500,
   };
-
+  console.log('insightsUrl',insightsUrl)
   const { data } = await axios.get(insightsUrl, { params: insightsParams });
   const adInsights = data.data;
-  // console.log('adInsights',adInsights)
+  console.log('adInsights',adInsights)
   for (const item of adInsights) {
     let image_url = null;
     let creativeId = null;

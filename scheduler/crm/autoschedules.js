@@ -3,20 +3,12 @@ import mysql from 'mysql2/promise';
 import filmmakersContoller from '../../controllers/crm/filmmakers.js';
 
 // // MySQL 데이터베이스 연결 설정
-// const pool = mysql.createPool({
-//     host: process.env.DB_HOST || 'taulftp.mycafe24.com',
-//     user: process.env.DB_USER || 'taulftp',
-//     password: process.env.DB_PASSWORD || 'dkffjqb@82',
-//     database: process.env.DB_NAME || 'taulftp',
-//     port: "3306",
-//     multipleStatements: true,
-//     connectionLimit: 10 // 풀 내에서 최대 10개의 연결을 허용
-// });
+
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: process.env.DB_HOST || 'taulftp.mycafe24.com',
+  user: process.env.DB_USER || 'taulftp',
+  password: process.env.DB_PASSWORD || 'dkffjqb@82',
+  database: process.env.DB_NAME || 'taulftp',
   waitForConnections: true,
   connectionLimit: parseInt(process.env.DB_CONN_LIMIT || '10', 10),
 });
