@@ -160,6 +160,69 @@ const postEdit = async () => {
                 'priority': 'u=1, i',
                 'Cookie': getCookie
             },
+            data: querystring.stringify(formData),
+            timeout: 20000
+        };
+        // console.log('options', options)
+        const response = await axios(options);
+
+        console.log('reponse', response.data.message)
+        // res.json({ message: response.data })
+        console.log(response.data)
+        return response.data
+
+    } catch (error) {
+        console.error('postEdit Error:', error);
+        return 'postEdit Error:' + error
+    }
+
+}
+
+const postEditThumbnail = async () => {
+
+    const getCookie = await getLogin()
+    const CrsfToken = await getCrsfToken(getCookie)
+    const getInfoVaule = await getInfo(getCookie)
+    const ContentValue = getInfoVaule.ContentValue
+    const title = getInfoVaule.title
+
+    console.log({ 'getCookie': getCookie, 'CrsfToken': CrsfToken, title: title, ContentValue: ContentValue })
+    let ContentChg = ContentValue.replace(/'/g, '');
+    ContentChg = ContentChg.replace(new RegExp('\n +', 'g'), '')
+    const formData = {
+        file_srl: '22814467',
+        mid: 'locationBank',
+        editor_sequence: '21206554',
+        module: 'file',
+        act: 'procFileSetCoverImage',
+    };
+    try {
+        const options = {
+            method: 'POST',
+            url: 'https://www.filmmakers.co.kr/',
+            headers: {
+                'authority': 'www.filmmakers.co.kr',
+                'scheme': 'https',
+                'path': '/',
+                // 'content-length': '3000',
+                'sec-ch-ua-platform': '"macOS"',
+                'x-csrf-token': CrsfToken,
+                'sec-ch-ua': '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
+                'sec-ch-ua-mobile': '?0',
+                'x-requested-with': 'XMLHttpRequest',
+                'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+                'accept': 'application/json, text/javascript, */*; q=0.01',
+                'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'origin': 'https://www.filmmakers.co.kr',
+                'sec-fetch-site': 'same-origin',
+                'sec-fetch-mode': 'cors',
+                'sec-fetch-dest': 'empty',
+                'referer': 'https://www.filmmakers.co.kr/locations/21206554/edit',
+                'accept-encoding': 'gzip, deflate, br, zstd',
+                'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+                'priority': 'u=1, i',
+                'Cookie': getCookie
+            },
             data: querystring.stringify({
                 '_filter': 'insert',
                 'error_return_url': '/locations/21206554/edit',
@@ -194,11 +257,12 @@ const postEdit = async () => {
         return response.data
 
     } catch (error) {
-        console.error('postEdit Error:', error);
-        return 'postEdit Error:' + error
+        console.error('postEditThumbnail Error:', error);
+        return 'postEditThumbnail Error:' + error
     }
 
 }
+
 
 export default {
     getLogin,
