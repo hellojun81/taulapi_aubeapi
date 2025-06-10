@@ -126,7 +126,7 @@ async function fetchStats(ids, dateRange) {
   }
 }
 
-export async function fetchNaverAds(sinceDate, untilDate) {
+export async function fetchNaverAds(platform,sinceDate, untilDate) {
   const campaigns = await fetchCampaigns();
   const dateList = getDateRangeList(sinceDate, untilDate);
 
@@ -161,18 +161,12 @@ export async function fetchNaverAds(sinceDate, untilDate) {
       for (const date of dateList) {
         // console.log({'unitIds':unitIds,'date':date})
         const stats = await fetchStats(unitIds, { since: date, until: date });
-        // console.log("stats", stats);
+
         for (const s of stats) {
           const rawLabel = idMap[s.id]; // 배열 or 문자열 or undefined 가능
           const label = safeLabel(rawLabel); // ✅ 안전화
-
-          // const label = idMap[s.id] || '(unknown)';
           const clicks = s.clkCnt;
           const spend = s.cpc * clicks;
-          // if(label=='nad-a001-06-000000314459815'){
-          //   console.log('stats',stats)
-          // }
-          //  console.log('stats',s)
           const record = calculateDerivedMetrics({
             platform: "naver",
             date,
@@ -200,9 +194,9 @@ export async function fetchNaverAds(sinceDate, untilDate) {
             image_url: null,
           });
           //  console.table(record);
-          if (s.id === "nad-a001-06-000000314459815") {
-            console.table(record); // 콘솔 테이블 형태 출력 (단순 key-value 확인 시)
-          }
+          // if (s.id === "nad-a001-06-000000314459815") {
+          //   console.table(record); // 콘솔 테이블 형태 출력 (단순 key-value 확인 시)
+          // }
           const exists = await recordExists(record);
           if (!exists) {
             await insertAdPerformance(record);

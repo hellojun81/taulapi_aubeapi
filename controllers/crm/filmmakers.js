@@ -122,6 +122,12 @@ const getCrsfToken = async (cookie) => {
 }
 
 const postEdit = async () => {
+    
+    const now = new Date(); // 현재 시간
+    const minute = now.getMinutes(); // 분 단위
+    if (minute % 2 === 0) {
+    await postEditThumbnail()
+    } 
 
     const getCookie = await getLogin()
     const CrsfToken = await getCrsfToken(getCookie)
@@ -186,11 +192,16 @@ const postEditThumbnail = async () => {
     const ContentValue = getInfoVaule.ContentValue
     const title = getInfoVaule.title
 
-    console.log({ 'getCookie': getCookie, 'CrsfToken': CrsfToken, title: title, ContentValue: ContentValue })
+    // console.log({ 'getCookie': getCookie, 'CrsfToken': CrsfToken, title: title, ContentValue: ContentValue })
     let ContentChg = ContentValue.replace(/'/g, '');
     ContentChg = ContentChg.replace(new RegExp('\n +', 'g'), '')
+    //24993914,22814417,22814428,22814444,22814467,24758808,22814454,22814430,24873205
+    const file_srl = [24993914, 22814417, 22814428, 22814444, 22814467, 24758808, 22814454, 22814430, 24873205];
+    const randomOne = file_srl[Math.floor(Math.random() * file_srl.length)];
+
+
     const formData = {
-        file_srl: '22814467',
+        file_srl: randomOne,
         mid: 'locationBank',
         editor_sequence: '21206554',
         module: 'file',
@@ -223,37 +234,11 @@ const postEditThumbnail = async () => {
                 'priority': 'u=1, i',
                 'Cookie': getCookie
             },
-            data: querystring.stringify({
-                '_filter': 'insert',
-                'error_return_url': '/locations/21206554/edit',
-                'act': 'procBoardInsertDocument',
-                'mid': 'locations',
-                'document_srl': '21206554',
-                'category_srl': '2348353',
-                'title': title,
-                'extra_vars1': '홍재욱',
-                'extra_vars2': '04796|@|서울 성동구 아차산로11가길 6|@|(서울 성동구 성수동2가 278-33)',
-                'extra_vars4': 'taulcontact@gmail.com',
-                'extra_vars3': '010|@|3101|@|9551',
-                'extra_vars5': 'https://www.aubestudio.co.kr/',
-                'allow_comment': 'Y',
-                'status': 'PUBLIC',
-                'tags': '렌탈스튜디오, 스튜디오, 성수동스튜디오, 공간대여, 촬영, 대형스튜디오, 행사, 팝업',
-                '_rx_csrf_token': CrsfToken,
-                'use_editor': 'Y',
-                'use_html': 'Y',
-                '_rx_ajax_compat': 'XMLRPC',
-                'module': 'board',
-                'content': ContentChg
-            }),
+            data: querystring.stringify(formData),
             timeout: 20000
         };
-        console.log('options', options)
         const response = await axios(options);
-
-        console.log('reponse', response.data.message)
-        // res.json({ message: response.data })
-        console.log(response.data)
+        console.log('postEditThumbnail', response.data.message)
         return response.data
 
     } catch (error) {
@@ -267,7 +252,8 @@ const postEditThumbnail = async () => {
 export default {
     getLogin,
     getInfo,
-    postEdit
+    postEdit,
+    postEditThumbnail
 };
 
 

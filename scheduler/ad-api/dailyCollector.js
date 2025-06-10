@@ -11,12 +11,12 @@ import { fetchNaverAds } from '../../services/ad-api/naverSearch.js';
 const date = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
 const PLATFORMS = [
   { name: 'meta', fetcher: (date) => fetchMetaAds('meta', date, date) },
-  { name: 'naver',  fetcher: (date) => fetchNaverAds( date, date) },
+  { name: 'naver',  fetcher: (date) => fetchNaverAds('naver', date, date) },
   { name: 'instagram', fetcher: (date) => fetchMetaAds('instagram', date,date) },
 ];
 
 
-// cron.schedule('0 0 * * *', async () => {
+// cron.schedule('54 13 * * *', async () => {
 cron.schedule('0 5 * * *', async () => {
   const date = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
 
