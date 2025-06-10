@@ -17,25 +17,25 @@ const PLATFORMS = [
 
 
 // cron.schedule('54 13 * * *', async () => {
-cron.schedule('0 5 * * *', async () => {
+cron.schedule('01 15 * * *', async () => {
   const date = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
 
 
 await Promise.all(
   PLATFORMS.map(async ({ name, fetcher }) => {
     try {
-       
       const result = await fetcher(date);
-console.log({
-  [`⏰광고성과 수집 api시작: ${date} PLATFORMS : ${name}`]: result
-});
+      console.log({
+        [`⏰광고성과 수집 api시작: ${date} PLATFORMS : ${name}`]: result
+      });
       // 👇 반드시 배열인 값만 전달
       const dataList = result.insertedItems ?? result.data ?? [];
-
       if (!Array.isArray(dataList)) {
         throw new Error(`[${name}] fetcher did not return a valid array`);
       }
-  
+      console.log({
+        [`⏰광고성과 수집 종료:`]: result
+      });
     } catch (err) {
       console.error(`❌ [${name}] error:`, err);
     }
