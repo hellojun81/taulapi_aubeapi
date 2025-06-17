@@ -133,7 +133,7 @@ export async function fetchNaverAds(platform,sinceDate, untilDate) {
   let inserted = 0;
   let skipped = 0;
   const skippedIds = [];
-
+cnosole.log({platform:platform})
   for (const campaign of campaigns) {
     const campaignId = campaign.nccCampaignId;
     const campaignName = campaign.name;
@@ -193,7 +193,7 @@ export async function fetchNaverAds(platform,sinceDate, untilDate) {
             device: undefined,
             image_url: null,
           });
-          //  console.table(record);
+           console.table(record);
           // if (s.id === "nad-a001-06-000000314459815") {
           //   console.table(record); // 콘솔 테이블 형태 출력 (단순 key-value 확인 시)
           // }

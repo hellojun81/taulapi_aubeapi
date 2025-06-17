@@ -36,7 +36,9 @@ const executeScheduledTasks = async () => {
             `SELECT * FROM filmmakersjobs 
              WHERE execute_hour = ? 
                AND execute_minute < ? 
-               AND is_executed = FALSE`,
+               AND is_executed = FALSE
+               AND play = 'Y'
+               `,
             [currentHour, currentMinute]
         );
         // 현재 시간에 맞는 작업 실행

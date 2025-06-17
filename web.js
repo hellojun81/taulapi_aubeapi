@@ -51,11 +51,11 @@ app.get('/login', async (req, res) => {
             res.status(401).json(false); // 로그인 실패 시 'false' 반환
         }
     } catch (error) {
-        // 오류 처리
         console.error(error);
         res.status(500).json({ message:error+ '서버 오류가 발생했습니다.' });
     }
 });
+
 
 app.use('/api/customers', customersRoutes);
 app.use('/api/filmmakers', filmmakersRoutes);
