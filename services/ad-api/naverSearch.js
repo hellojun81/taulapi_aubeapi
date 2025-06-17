@@ -94,7 +94,7 @@ async function fetchAds(adGroupId) {
 async function fetchStats(ids, dateRange) {
   const uri = "/stats";
   const method = "GET";
-   console.log({'ids':ids,'dateRange':dateRange,'uri':uri,'method':method})
+  //  console.log({'ids':ids,'dateRange':dateRange,'uri':uri,'method':method})
   try {
     const res = await axios.get(BASE_URL + uri, {
       headers: getHeaders(method, uri),
@@ -128,12 +128,14 @@ async function fetchStats(ids, dateRange) {
 
 export async function fetchNaverAds(platform,sinceDate, untilDate) {
   const campaigns = await fetchCampaigns();
+  // console.log({'sinceDate':sinceDate,'untilDate':untilDate})
   const dateList = getDateRangeList(sinceDate, untilDate);
 
+ 
   let inserted = 0;
   let skipped = 0;
   const skippedIds = [];
-cnosole.log({platform:platform})
+
   for (const campaign of campaigns) {
     const campaignId = campaign.nccCampaignId;
     const campaignName = campaign.name;
@@ -144,11 +146,11 @@ cnosole.log({platform:platform})
     for (const adGroup of adGroups) {
       const adGroupId = adGroup.nccAdgroupId;
       const adName = adGroup.name;
-      // console.log('isPlaceCampaign',campaign)
+      // console.log({'isPlaceCampaign':campaign,'adGroupId':adGroupId})
       const units = isPlaceCampaign
         ? await fetchAds(adGroupId)
         : await fetchKeywords(adGroupId);
-
+      // console.log('units',units)
       if (!Array.isArray(units) || units.length === 0) continue;
 
       const idMap = {};
@@ -157,7 +159,7 @@ cnosole.log({platform:platform})
         idMap[id] = isPlaceCampaign ? u.ad : u.keyword;
         return id;
       });
-
+// console.log('dateList',dateList)
       for (const date of dateList) {
         // console.log({'unitIds':unitIds,'date':date})
         const stats = await fetchStats(unitIds, { since: date, until: date });
@@ -193,7 +195,7 @@ cnosole.log({platform:platform})
             device: undefined,
             image_url: null,
           });
-           console.table(record);
+          //  console.table(record);
           // if (s.id === "nad-a001-06-000000314459815") {
           //   console.table(record); // 콘솔 테이블 형태 출력 (단순 key-value 확인 시)
           // }

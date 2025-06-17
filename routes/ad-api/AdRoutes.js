@@ -32,7 +32,7 @@ router.post('/ad-register/insert', async (req, res) => {
       break;
     case 'naver':
       console.log('naver 광고성과 저장');
-      result = await fetchNaverAds(sinceDate,untilDate);
+      result = await fetchNaverAds('naver',sinceDate,untilDate);
       break;
     default:
       console.log('❓ 알 수 없는 플랫폼:', platform);

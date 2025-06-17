@@ -5,7 +5,8 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   const { startDate, endDate, platform } = req.query;
-console.log({startDate:startDate,endDate:endDate})
+  // console.log({startDate:startDate,endDate:endDate})
+
   try {
     const [rows] = await pool.execute(
       `SELECT * FROM AdPerformance
@@ -26,11 +27,6 @@ const results = rows.map(row => ({
   ad_name: row.ad_name?.toString(),
 }));
 res.json(results);
-
-    // res.json(rows);
-
-
-
 
   } catch (err) {
     console.error('❌ DB fetch error:', err);
