@@ -18,7 +18,7 @@ const PLATFORMS = [
 
 // cron.schedule('54 13 * * *', async () => {
 
-cron.schedule('08 12 * * *', async () => {
+cron.schedule('05 05 * * *', async () => {
   const date = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
 
 
