@@ -11,11 +11,11 @@ export async function fetchMetaAds(platform, sinceDate, untilDate) {
   let skipped = 0;
   const skippedIds = [];
   const AD_ACCOUNT_ID =
-    platform === 'meta' ? process.env.META_AD_ACCOUNT_ID : process.env.INSTA_AD_ACCOUNT_ID;
-console.log('AD_ACCOUNT_ID',AD_ACCOUNT_ID)
+    platform === 'meta' ? '7775622129165783' : '2571766936328566'
+// console.log('AD_ACCOUNT_ID',AD_ACCOUNT_ID)
   const insightsUrl = `https://graph.facebook.com/v19.0/act_${AD_ACCOUNT_ID}/insights`;
   const insightsParams = {
-    access_token: ACCESS_TOKEN,
+    access_token: 'EAAT2XZBSiX2wBO9aS3SZC407IPAxcL7rdZAL484Cnr0plt7DbBHP2f2Skz9JtCTvSETjGNFYNoKYY2H0Fx5uHWjo0V5vcnDueBR8sbZC0PHwM0NHdGrIpJcJ4otq59hQhmHkz5QvFzP6YUkCTuuLsfPGM8l0GA2ZBseT1IMUqRgdTClTcpl8owhMyfRrZBNknZCcwZDZD',
     level: 'ad',
     fields: [
       'ad_id',
@@ -40,10 +40,10 @@ console.log('AD_ACCOUNT_ID',AD_ACCOUNT_ID)
     time_increment: 1,
     limit: 500,
   };
-  console.log('insightsUrl',insightsUrl)
+  // console.log('insightsUrl',insightsUrl)
   const { data } = await axios.get(insightsUrl, { params: insightsParams });
   const adInsights = data.data;
-  console.log('adInsights',adInsights)
+  // console.log('adInsights',adInsights)
   for (const item of adInsights) {
     let image_url = null;
     let creativeId = null;

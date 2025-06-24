@@ -9,9 +9,9 @@ import {
 import { calculateDerivedMetrics } from "../../lib/ad-api/calculateDerivedMetrics.js";
 
 const BASE_URL = "https://api.searchad.naver.com";
-const API_KEY = process.env.NAVER_ACCESS_LICENSE;
-const SECRET_KEY = process.env.NAVER_SECRET_KEY;
-const CUSTOMER_ID = process.env.NAVER_CUSTOMER_ID;
+const API_KEY = '01000000000f44bfbd7736905859146a4b6d61f314d01f877d6edf08f132ef70f3c93b9810';
+const SECRET_KEY = 'AQAAAAAPRL+9dzaQWFkUakttYfMUFYo0jOcXBaUMuCRKpm2GVQ==';
+const CUSTOMER_ID = '3224199';
 // 배열이면 첫 번째 값, 아니면 그대로, 없으면 기본값 반환
 const safeLabel = (value, fallback = "(unknown)") => {
   if (Array.isArray(value)) return value[0] ?? fallback;
