@@ -9,12 +9,14 @@ const getInfo = async (cookie) => {
     try {
         const options = {
             method: 'GET',
-            url: 'https://www.filmmakers.co.kr/locations/21206554/edit',
+            url: 'https://www.filmmakers.co.kr/locationBank/21206554/edit',
             headers: {
                 'Cookie': cookie
             }
         };
-
+        console.log({'getInfo cookie':cookie,
+            'options':options
+        })
         const response = await axios(options);
         const html = response.data;
         const document = parseDocument(html);
@@ -135,7 +137,26 @@ const postEdit = async () => {
     const ContentValue = getInfoVaule.ContentValue
     const title = getInfoVaule.title
 
-    console.log({ 'getCookie': getCookie, 'CrsfToken': CrsfToken, title: title, ContentValue: ContentValue })
+    const formData = {
+    _filter: "insert",
+    mid: "locationBank",
+    content: ContentValue,
+    document_srl: "21206554",
+    category_srl: "2348353",
+    title: "[성수동] 400평 단독건물 (야외 마당 촬영, 주차 10대) 입니다.^^",
+    extra_vars1: "홍재욱",
+    extra_vars3: "010-3101-9551",
+    extra_vars4: "taulcontact@gmail.com",
+    extra_vars5: "https://www.aubestudio.co.kr/",
+    extra_vars2: "04796|@|서울 성동구 아차산로11가길 6|@|(서울 성동구 성수동2가 278-33)",
+    comment_status: "ALLOW",
+    status: "PUBLIC",
+    _rx_csrf_token: "su03jMElkaRDhVvp",
+    module: "board",
+    act: "procBoardInsertDocument",
+    _rx_ajax_compat: "XMLRPC"
+    };
+
     let ContentChg = ContentValue.replace(/'/g, '');
     ContentChg = ContentChg.replace(new RegExp('\n +', 'g'), '')
 
@@ -150,7 +171,7 @@ const postEdit = async () => {
                 // 'content-length': '3000',
                 'sec-ch-ua-platform': '"macOS"',
                 'x-csrf-token': CrsfToken,
-                'sec-ch-ua': '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
+                'sec-ch-ua': '"Chromium";v="136", "Google Chrome";v="136", "Not.A/Brand";v="99"',
                 'sec-ch-ua-mobile': '?0',
                 'x-requested-with': 'XMLHttpRequest',
                 'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
@@ -160,7 +181,7 @@ const postEdit = async () => {
                 'sec-fetch-site': 'same-origin',
                 'sec-fetch-mode': 'cors',
                 'sec-fetch-dest': 'empty',
-                'referer': 'https://www.filmmakers.co.kr/locations/21206554/edit',
+                'referer': 'https://www.filmmakers.co.kr/locationBank/21206554/edit',
                 'accept-encoding': 'gzip, deflate, br, zstd',
                 'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
                 'priority': 'u=1, i',
@@ -169,10 +190,10 @@ const postEdit = async () => {
             data: querystring.stringify(formData),
             timeout: 20000
         };
-        // console.log('options', options)
+        // console.log('options', options)여기서 에러 발생하는듯 https://www.filmmakers.co.kr/locationBank/21206554/edit
         const response = await axios(options);
 
-        console.log('reponse', response.data.message)
+        // console.log('reponse', response.data.message)
         // res.json({ message: response.data })
         console.log(response.data)
         return response.data
@@ -200,7 +221,7 @@ const postEditThumbnail = async () => {
     const randomOne = file_srl[Math.floor(Math.random() * file_srl.length)];
 
 
-    const formData = {
+    formData = {
         file_srl: randomOne,
         mid: 'locationBank',
         editor_sequence: '21206554',
@@ -228,7 +249,7 @@ const postEditThumbnail = async () => {
                 'sec-fetch-site': 'same-origin',
                 'sec-fetch-mode': 'cors',
                 'sec-fetch-dest': 'empty',
-                'referer': 'https://www.filmmakers.co.kr/locations/21206554/edit',
+                'referer': 'https://www.filmmakers.co.kr/locationBank/21206554/edit',
                 'accept-encoding': 'gzip, deflate, br, zstd',
                 'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
                 'priority': 'u=1, i',
@@ -238,14 +259,12 @@ const postEditThumbnail = async () => {
             timeout: 20000
         };
         const response = await axios(options);
-        console.log('postEditThumbnail', response.data.message)
+        console.log({response_data:response.data})
         return response.data
-
     } catch (error) {
         console.error('postEditThumbnail Error:', error);
         return 'postEditThumbnail Error:' + error
     }
-
 }
 
 

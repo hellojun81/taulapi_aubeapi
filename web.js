@@ -12,12 +12,18 @@ import autoschedules from './scheduler/crm/autoschedules.js';
 import adPerformanceRouter from './routes/ad-api/adPerformanceRoute.js';
 import AdRoutes from './routes/ad-api/AdRoutes.js';
 import './scheduler/ad-api/dailyCollector.js'; 
+import filmmakersContoller from './controllers/crm/filmmakers.js';
+
 // import db from './lib/crm/sql.js'; // db import (경로는 프로젝트 구조에 맞게 조정)
 
 dotenv.config();
 const app = express();
 const httpServer = http.createServer(app);
 const port = process.env.PORT || 8001;
+
+const result = await filmmakersContoller.postEdit()
+console.log('필름메이커스결과',result)
+
 
 app.use(cors({
     origin: true,
