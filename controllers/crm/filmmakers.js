@@ -221,7 +221,7 @@ const postEditThumbnail = async () => {
     const randomOne = file_srl[Math.floor(Math.random() * file_srl.length)];
 
 
-    formData = {
+    const formData = {
         file_srl: randomOne,
         mid: 'locationBank',
         editor_sequence: '21206554',

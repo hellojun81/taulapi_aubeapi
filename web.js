@@ -21,8 +21,6 @@ const app = express();
 const httpServer = http.createServer(app);
 const port = process.env.PORT || 8001;
 
-const result = await filmmakersContoller.postEdit()
-console.log('필름메이커스결과',result)
 
 
 app.use(cors({
