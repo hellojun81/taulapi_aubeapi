@@ -127,9 +127,7 @@ const postEdit = async () => {
     
     const now = new Date(); // 현재 시간
     const minute = now.getMinutes(); // 분 단위
-    if (minute % 2 === 0) {
-    await postEditThumbnail()
-    } 
+    // if (minute % 2 === 0) { await postEditThumbnail() } 
 
     const getCookie = await getLogin()
     const CrsfToken = await getCrsfToken(getCookie)
