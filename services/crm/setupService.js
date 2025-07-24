@@ -24,7 +24,8 @@ const getScheduleById = async (id) => {
 const getTotalSales=async(month)=>{
 
     
-    const query=`SELECT (SELECT SUM(estPrice) FROM schedules WHERE LEFT(start, 7) = '${month}' AND csKind = '2') AS TOTALSALES, (SELECT SUM(spend) FROM AdPerformance WHERE LEFT(date, 7) = '${month}') AS TOTALADCOST;`
+    const query=`SELECT (SELECT SUM(estPrice) FROM schedules WHERE LEFT(start, 7) = '${month}' AND csKind = '2') AS TOTALSALES, (SELECT SUM(spend) FROM AdPerformance WHERE LEFT(date, 7) = '${month}') AS TOTALADCOST,
+(SELECT COUNT(*) FROM schedules WHERE csKind = '2' AND LEFT(START, 7) = '${month}') AS TOTALRENTCNT;`
     const result = await sql.executeQuery(query);
     console.log('getTotalSales',result[0])
     return result[0];
