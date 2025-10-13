@@ -2,7 +2,7 @@
 import sql from "../../lib/crm/sql.js";
 import dayjs from "dayjs";
 
-const selectqueryinit = `A.id, B.customerName,CONCAT('[', C.title, ']', B.customerName) AS title, A.start,A.end,A.rentPlace,A.startTime,A.endTime,A.userInt,A.estPrice
+const selectqueryinit = `A.id, B.customerName,CONCAT('[', C.title, ']', B.customerName) AS title,B.phone AS contactTel, A.created_at,A.start,A.end,A.rentPlace,A.startTime,A.endTime,A.userInt,A.estPrice
     ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,C.bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at ,A.ADmedia,D.name as AD_NAME
     FROM schedules A INNER JOIN Customers B ON A.customerName = B.id  INNER JOIN csKind C ON A.csKind = C.id INNER JOIN ADmedia D ON A.ADmedia=D.keycode`;
 

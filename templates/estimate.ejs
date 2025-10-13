@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>견적서 <%= no %></title>
+  <style>
+    body {
+      font-family: "Noto Sans KR", "Apple SD Gothic Neo", Arial, sans-serif;
+      font-size: 12px;
+      color: #000;
+      margin: 0;
+      padding: 20px;
+    }
+    .wrap {
+      width: 770px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .info {
+      margin-bottom: 20px;
+    }
+    .info p {
+      margin: 4px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 6px;
+    }
+    th {
+      background: #f2f2f2;
+    }
+    td.right, th.right {
+      text-align: right;
+    }
+    .totals th {
+      background: #fafafa;
+      text-align: right;
+    }
+    .supplier {
+      margin-top: 24px;
+      position: relative;
+    }
+    .supplier h3 {
+      margin-bottom: 8px;
+    }
+    .stamp {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      width: 100px;
+      opacity: 0.9;
+    }
+    .sign {
+      margin-top: 40px;
+      text-align: right;
+      font-size: 14px;
+    }
+    .bank {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>견 적 서</h1>
+
+    <div class="info">
+      <p>견적번호: <strong><%= no %></strong></p>
+      <p>견적일자: <strong><%= dateKR %></strong></p>
+      <p>수신: <strong><%= customerName %></strong> 귀하</p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:30%">품명</th>
+          <th style="width:20%">규격</th>
+          <th style="width:10%">수량</th>
+          <th style="width:20%">단가</th>
+          <th style="width:20%">공급가</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% items.forEach(it => { %>
+          <tr>
+            <td><%= it.name %></td>
+            <td><%= it.spec %></td>
+            <td class="right"><%= it.qty %></td>
+            <td class="right"><%= it.unit.toLocaleString() %></td>
+            <td class="right"><%= it.supply.toLocaleString() %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+      <tfoot>
+        <tr class="totals">
+          <th colspan="4">합계(공급가)</th>
+          <td class="right"><%= totalSupply.toLocaleString() %></td>
+        </tr>
+        <tr class="totals">
+          <th colspan="4">부가세 (10%)</th>
+          <td class="right"><%= totalTax.toLocaleString() %></td>
+        </tr>
+        <tr class="totals">
+          <th colspan="4">총 합계</th>
+          <td class="right"><%= (totalSupply + totalTax).toLocaleString() %></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="supplier">
+      <h3>공급자 정보</h3>
+      <% if (stampUrl) { %>
+        <img src="<%= stampUrl %>" alt="stamp" class="stamp" />
+      <% } %>
+      <p><strong><%= supplier.corpName %></strong> (등록번호 <%= supplier.regNo %>)</p>
+      <p>대표자: <%= supplier.ceo %></p>
+      <p>주소: <%= supplier.address %></p>
+      <p>업태/종목: <%= supplier.bizType %> / <%= supplier.item %></p>
+      <p>연락처: <%= supplier.tel %></p>
+      <div class="bank">입금계좌: <%= bankInfo %></div>
+    </div>
+
+    <div class="sign">
+      위와 같이 견적합니다.<br />
+      <br />
+      (인) __________________
+    </div>
+  </div>
+</body>
+</html>

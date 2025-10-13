@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 
 // 모든 고객 가져오기
 const getCustomers = async () => {
-    const query = 'SELECT * FROM Customers ORDER BY customerName';
+    const query = `SELECT * FROM Customers where dealYN='Y' ORDER BY customerName`;
     return await sql.executeQuery(query);
 };
 
@@ -16,8 +16,8 @@ const getCustomerById = async (customerName) => {
     }
     console.log('customerService customerName', customerName)
 
-    const query = `SELECT * FROM Customers WHERE customerName LIKE '%${customerName}%'
-    or contactPerson Like '%${customerName}%' or notes like '%${customerName}%'`;
+    const query = `SELECT * FROM Customers WHERE dealYN = 'Y'  and (customerName LIKE '%${customerName}%'
+    or contactPerson Like '%${customerName}%' or notes like '%${customerName}%')`;
     // console.log(query)
     try {
         const result = await sql.executeQuery(query, );
@@ -32,7 +32,7 @@ const getCustomerById = async (customerName) => {
 
 // 고객 추가
 const addCustomer = async (customer) => {
-    const checkquery = `select * from Customers where customerName='${customer.customerName}'`
+    const checkquery = `select * from Customers where customerName='${customer.customerName}' and dealYN='Y'`
     const checkresult = await sql.executeQuery(checkquery)
     console.log('addCustomer=', checkresult.length)
     customer.inboundDate=dayjs(customer.inboundDate).format('YYYY-MM-DD')
@@ -81,9 +81,11 @@ const updateCustomer = async (id, customer) => {
     return result.affectedRows > 0;
 };
 
-// 고객 삭제
+// 고객 삭제 고객삭제는 실제 데이터 삭제가 아닌 숨기기로 처리
 const deleteCustomer = async (id) => {
-    const query = 'DELETE FROM Customers WHERE id = ?';
+    // const query = 'DELETE FROM Customers WHERE id = ?';
+    const query = "UPDATE Customers SET dealYN = 'N' WHERE id = ?";
+
     const result = await sql.executeQuery(query, [id]);
     return result.affectedRows > 0;
 };
