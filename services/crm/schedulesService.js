@@ -1,14 +1,24 @@
 // services/schedulesService.js
 import sql from "../../lib/crm/sql.js";
 import dayjs from "dayjs";
+const MoneyfinishNYcolor = "#505050";
 
 const selectqueryinit = `A.id, B.customerName,CONCAT('[', C.title, ']', B.customerName) AS title,B.phone AS contactTel, A.created_at,A.start,A.end,A.rentPlace,A.startTime,A.endTime,A.userInt,A.estPrice
-    ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,C.bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at ,A.ADmedia,D.name as AD_NAME
+    ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,
+      CASE 
+        WHEN A.moneyfinishNY = '1' THEN '${MoneyfinishNYcolor}' -- 'Y'일 때 (예: 입금 완료) 녹색 계열 색상
+        WHEN A.moneyfinishNY = '0' THEN C.bgcolor  -- 'N'일 때 (예: 입금 대기) 기존 색상 유지
+        ELSE C.bgcolor                             -- 그 외의 값은 기존 색상 유지
+    END AS bgcolor
+    
+    ,B.notes as customerEtc,B.contactPerson ,A.created_at ,A.ADmedia,D.name as AD_NAME,A.MoneyfinishNY 
     FROM schedules A INNER JOIN Customers B ON A.customerName = B.id  INNER JOIN csKind C ON A.csKind = C.id INNER JOIN ADmedia D ON A.ADmedia=D.keycode`;
 
 const getAllSchedules = async () => {
   const query = `SELECT ${selectqueryinit} ORDER BY FIELD(C.title, '대관', '답사', '가부킹', '단순문의', '기타');`;
-  return await sql.executeQuery(query);
+  const result = await sql.executeQuery(query);
+  // console.log(result);
+  return result;
 };
 const getCustomerID = async (CustomerName) => {
   console.log("getCustomerID");
@@ -132,14 +142,22 @@ const getScheduleByMonth = async (Month, sort) => {
 
   let Newselectqueryinit;
   Newselectqueryinit = `A.id, B.customerName,CONCAT('[', C.title, ']', B.customerName) AS title, A.start,A.end,A.rentPlace,A.startTime,A.endTime,A.userInt,A.estPrice
-    ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,C.bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at ,A.ADmedia
+    ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,    CASE 
+        WHEN A.moneyfinishNY = '1' THEN '${MoneyfinishNYcolor}' -- 'Y'일 때 (예: 입금 완료) 녹색 계열 색상
+        WHEN A.moneyfinishNY = '0' THEN C.bgcolor  -- 'N'일 때 (예: 입금 대기) 기존 색상 유지
+        ELSE C.bgcolor                             -- 그 외의 값은 기존 색상 유지
+    END AS bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at ,A.ADmedia
     FROM schedules A INNER JOIN Customers B ON A.customerName = B.id  INNER JOIN csKind C ON A.csKind = C.id`;
 
   switch (sort) {
     case "CREATE":
       Sort2 = "A.created_at";
       Newselectqueryinit = `A.id, B.customerName,CONCAT('[', C.title, ']', B.customerName) AS title, A.start,A.end,A.rentPlace,A.startTime,A.endTime,A.userInt,A.estPrice
-    ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,C.bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at as start ,A.created_at as end , A.ADmedia
+    ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,    CASE 
+        WHEN A.moneyfinishNY = '1' THEN '${MoneyfinishNYcolor}' -- 'Y'일 때 (예: 입금 완료) 녹색 계열 색상
+        WHEN A.moneyfinishNY = '0' THEN C.bgcolor  -- 'N'일 때 (예: 입금 대기) 기존 색상 유지
+        ELSE C.bgcolor                             -- 그 외의 값은 기존 색상 유지
+    END AS bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at as start ,A.created_at as end , A.ADmedia
     FROM schedules A INNER JOIN Customers B ON A.customerName = B.id  INNER JOIN csKind C ON A.csKind = C.id`;
       break;
     case "START":
@@ -163,11 +181,11 @@ const getScheduleByMonth = async (Month, sort) => {
   if (sort === undefined) {
     Sort2 = "A.start";
   }
-// CAST(CONCAT('총 광고비: ', FORMAT(SUM(spend), 0), '원') AS CHAR) AS title
-if (sort === "CREATECNT") {
-  // ✅ sort가 "cnt"인 경우
-  const datePrefix = `${year}-${month}`;
-  query=`(
+  // CAST(CONCAT('총 광고비: ', FORMAT(SUM(spend), 0), '원') AS CHAR) AS title
+  if (sort === "CREATECNT") {
+    // ✅ sort가 "cnt"인 경우
+    const datePrefix = `${year}-${month}`;
+    query = `(
   -- 일정 데이터
   SELECT  
     'time' AS category,
@@ -213,47 +231,47 @@ ORDER BY
     WHEN 'time' THEN 0
     WHEN 'summary' THEN 1
   END;
-`
-//   query = `(
-//   -- 일정 데이터
-//   SELECT  
-//     'time' AS category,
-//     DATE(A.created_at) AS start,
-//     DATE(A.created_at) AS end,
-//     A.ADmedia,
-//     NULL AS dummy,
-//     CONCAT(B.name, '*', COUNT(*), '건') AS title
-//   FROM schedules A
-//   JOIN ADmedia B ON A.ADmedia = B.keycode
-//   JOIN csKind C ON C.id = 1 AND A.csKind = C.id
-//   WHERE   LEFT(A.created_at, 7) = '${datePrefix}'
-//   GROUP BY DATE(A.created_at), A.ADmedia
-// )
-// UNION ALL
-// (
-//   -- 날짜별 총 광고비
-//   SELECT  
-//     'time' AS category,
-//     date AS start,
-//     date AS end,
-//     NULL AS ADmedia,
-//     NULL AS dummy,
-//     CONCAT('총 광고비: ', FORMAT(SUM(spend), 0), '원') AS title
-//   FROM AdPerformance
-//   WHERE LEFT(date, 7) = '${datePrefix}'
-//   GROUP BY date
-// )
-// ORDER BY 
-//   start,
-//   CASE category
-//     WHEN 'time' THEN 0
-//     WHEN 'summary' THEN 1
-//   END;
-// `;
-} else if (sort === "ADSPEND") {
-  // ✅ sort가 "ADSPEND"인 경우 (총 광고비 합계 출력)
-const datePrefix = `${year}-${month}`;
- query = `
+`;
+    //   query = `(
+    //   -- 일정 데이터
+    //   SELECT
+    //     'time' AS category,
+    //     DATE(A.created_at) AS start,
+    //     DATE(A.created_at) AS end,
+    //     A.ADmedia,
+    //     NULL AS dummy,
+    //     CONCAT(B.name, '*', COUNT(*), '건') AS title
+    //   FROM schedules A
+    //   JOIN ADmedia B ON A.ADmedia = B.keycode
+    //   JOIN csKind C ON C.id = 1 AND A.csKind = C.id
+    //   WHERE   LEFT(A.created_at, 7) = '${datePrefix}'
+    //   GROUP BY DATE(A.created_at), A.ADmedia
+    // )
+    // UNION ALL
+    // (
+    //   -- 날짜별 총 광고비
+    //   SELECT
+    //     'time' AS category,
+    //     date AS start,
+    //     date AS end,
+    //     NULL AS ADmedia,
+    //     NULL AS dummy,
+    //     CONCAT('총 광고비: ', FORMAT(SUM(spend), 0), '원') AS title
+    //   FROM AdPerformance
+    //   WHERE LEFT(date, 7) = '${datePrefix}'
+    //   GROUP BY date
+    // )
+    // ORDER BY
+    //   start,
+    //   CASE category
+    //     WHEN 'time' THEN 0
+    //     WHEN 'summary' THEN 1
+    //   END;
+    // `;
+  } else if (sort === "ADSPEND") {
+    // ✅ sort가 "ADSPEND"인 경우 (총 광고비 합계 출력)
+    const datePrefix = `${year}-${month}`;
+    query = `
   SELECT
     'time' AS category,
     date AS start,
@@ -288,23 +306,22 @@ const datePrefix = `${year}-${month}`;
 
   ORDER BY start ASC, platform ASC
 `;
-
-} else {
-  // ✅ 그 외 경우 (기본 쿼리)
-  query = `SELECT ${Newselectqueryinit}
+  } else {
+    // ✅ 그 외 경우 (기본 쿼리)
+    query = `SELECT ${Newselectqueryinit}
            WHERE LEFT(${Sort2}, 7) BETWEEN '${NewPrevMonth}' AND '${NewNextMonth}'
            ${Sortby}`;
-}
-
-
+  }
 
   console.log("querytest", query);
   let result = await sql.executeQuery(query);
-  result = result.map(row => ({
-  ...row,
-  title: Buffer.isBuffer(row.title) ? row.title.toString('utf8') : row.title,
-  category: Buffer.isBuffer(row.category) ? row.category.toString('utf8') : row.category
-}));
+  result = result.map((row) => ({
+    ...row,
+    title: Buffer.isBuffer(row.title) ? row.title.toString("utf8") : row.title,
+    category: Buffer.isBuffer(row.category)
+      ? row.category.toString("utf8")
+      : row.category,
+  }));
 
   // console.log(result)
   return result;
