@@ -1,35 +1,31 @@
-
 // services/schedulesService.js
-import sql from '../../lib/crm/sql.js';
+import sql from "../../lib/crm/sql.js";
 
 const getAllSetup = async () => {
-    const query = 'SELECT * FROM schedules';
-    return await sql.executeQuery(query);
+  const query = "SELECT * FROM schedules";
+  return await sql.executeQuery(query);
 };
 
 const getSetupID = async (TableName) => {
-    console.log('getSetupTable',TableName)
-    const query = `SELECT * FROM ${TableName}`;
-    const result = await sql.executeQuery(query);
-    return result;
+  // console.log('getSetupTable',TableName)
+  const query = `SELECT * FROM ${TableName}`;
+  const result = await sql.executeQuery(query);
+  return result;
 };
 
-const getScheduleById = async (id) => {
-    const query = 'SELECT * FROM schedules WHERE id = ?';
-    const result = await sql.executeQuery(query, [id]);
-    return result[0];
+// const getScheduleById = async (id) => {
+//   const query = "SELECT * FROM schedules WHERE id = ?";
+//   const result = await sql.executeQuery(query, [id]);
+//   return result[0];
+// };
+
+const getTotalSales = async (month) => {
+  const query = `SELECT (SELECT SUM(estPrice) FROM schedules WHERE LEFT(start, 7) = '${month}' AND csKind = '2') AS TOTALSALES, (SELECT SUM(spend) FROM AdPerformance WHERE LEFT(date, 7) = '${month}') AS TOTALADCOST,
+(SELECT COUNT(*) FROM schedules WHERE csKind = '2' AND LEFT(START, 7) = '${month}') AS TOTALRENTCNT;`;
+  const result = await sql.executeQuery(query);
+  // console.log('getTotalSales',result[0])
+  return result[0];
 };
-
-
-const getTotalSales=async(month)=>{
-
-    
-    const query=`SELECT (SELECT SUM(estPrice) FROM schedules WHERE LEFT(start, 7) = '${month}' AND csKind = '2') AS TOTALSALES, (SELECT SUM(spend) FROM AdPerformance WHERE LEFT(date, 7) = '${month}') AS TOTALADCOST,
-(SELECT COUNT(*) FROM schedules WHERE csKind = '2' AND LEFT(START, 7) = '${month}') AS TOTALRENTCNT;`
-    const result = await sql.executeQuery(query);
-    console.log('getTotalSales',result[0])
-    return result[0];
-}
 
 // const createSchedule = async (schedule) => {
 //     const { calendarId, title,  start, end, category, customerName, rentPlace, bgColor } = schedule;
@@ -58,11 +54,11 @@ const getTotalSales=async(month)=>{
 // };
 
 export default {
-    getAllSetup,
-    getSetupID,
-    getTotalSales
-    // createSchedule,
-    // getScheduleByMonth,
-    // updateSchedule,
-    // deleteSchedule,
+  getAllSetup,
+  getSetupID,
+  getTotalSales,
+  // createSchedule,
+  // getScheduleByMonth,
+  // updateSchedule,
+  // deleteSchedule,
 };

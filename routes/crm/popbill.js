@@ -1,11 +1,20 @@
 // routes/crm/popbill.js (ESM)
 import express from "express";
-import popbillController from "../../controllers/popbill/popbillController.js";
+import * as popbillController from "../../controllers/popbill/popbillController.js";
 
 const router = express.Router();
-router.get("/:id", popbillController.getsearch);
-// router.put("/:tid/:trserial", popbillController.UpdateMemo);
-router.post("/transactions/bulkUpdate", popbillController.BulkUpdateMemo);
-router.put("/updateMoneyfinish", popbillController.updateMoneyfinish);
 
+router.get("/kakao/Templatelist", popbillController.Templatelist);
+router.get("/kakao/TemplateContent", popbillController.TemplateContent);
+router.post("/kakao/MessageSend", popbillController.MessageSend);
+router.get("/kakao/getSendMessages", popbillController.getSendMessages);
+
+router.get("/biz/checkBizInfo", popbillController.checkBizInfo);
+
+router.post("/tax/registTaxIssue", popbillController.registTaxIssue);
+
+router.get("/bank/latestTransactions", popbillController.latestTransactions);
+router.get("/bank/get_DB_BankTransactions", popbillController.get_DB_BankTransactions);
+router.put("/bank/updateMoneyfinish", popbillController.updateMoneyfinish);
+router.post("/bank/bulkUpdate", popbillController.BulkUpdateMemo);
 export default router;

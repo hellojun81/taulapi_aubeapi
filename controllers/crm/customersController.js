@@ -4,9 +4,7 @@ import customersService from "../../services/crm/customersService.js";
 const addCustomer = async (req, res) => {
   try {
     const customer = req.body;
-    // console.log('customer',customer)
     const result = await customersService.addCustomer(customer);
-    console.log(result);
     res.status(201).json({ message: result.msg });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -26,7 +24,7 @@ const getCustomers = async (req, res) => {
 const getCustomerById = async (req, res) => {
   try {
     const { customerName } = req.query;
-    console.log("getCustomerById", req.params);
+    // console.log("getCustomerById", req.params);
     const customer = await customersService.getCustomerById(customerName);
     res.json(customer);
   } catch (error) {
@@ -38,7 +36,7 @@ const updateCustomer = async (req, res) => {
   try {
     const { id } = req.params;
     const customer = req.body;
-    console.log({ id: id, customer: customer });
+    // console.log({ id: id, customer: customer });
     await customersService.updateCustomer(id, customer);
     res.status(200).json({ message: "수정 완료" });
   } catch (error) {

@@ -16,11 +16,6 @@ import AdRoutes from "./routes/ad-api/AdRoutes.js";
 import "./scheduler/ad-api/dailyCollector.js";
 import popbillRoutes from "./routes/crm/popbill.js";
 
-// import adPerformanceRouter from "./routes/ad-api/adPerformanceRoute.js";
-// import filmmakersContoller from "./controllers/crm/filmmakers.js";
-// import bankService from "./scheduler/crm/AutobankService.js";
-// import db from './lib/crm/sql.js'; // db import (경로는 프로젝트 구조에 맞게 조정)
-
 dotenv.config();
 const app = express();
 const httpServer = http.createServer(app);
@@ -47,9 +42,7 @@ app.get("/login", async (req, res) => {
     const { id, pw } = req.query;
     // id 또는 pw가 존재하지 않을 경우 처리
     if (!id || !pw) {
-      return res
-        .status(400)
-        .json({ message: "ID와 비밀번호를 모두 입력해주세요." });
+      return res.status(400).json({ message: "ID와 비밀번호를 모두 입력해주세요." });
     }
     // SQL 쿼리 실행
     const query = `SELECT id, pw FROM login WHERE id = ? AND pw = ?`;

@@ -6,52 +6,32 @@ const MoneyfinishNYcolor = "#505050";
 const selectqueryinit = `A.id, B.customerName,CONCAT('[', C.title, ']', B.customerName) AS title,B.phone AS contactTel, A.created_at,A.start,A.end,A.rentPlace,A.startTime,A.endTime,A.userInt,A.estPrice
     ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,
       CASE 
-        WHEN A.moneyfinishNY = '1' THEN '${MoneyfinishNYcolor}' -- 'Y'일 때 (예: 입금 완료) 녹색 계열 색상
-        WHEN A.moneyfinishNY = '0' THEN C.bgcolor  -- 'N'일 때 (예: 입금 대기) 기존 색상 유지
+        WHEN A.moneyFinishNY = '1' THEN '${MoneyfinishNYcolor}' -- 'Y'일 때 (예: 입금 완료) 녹색 계열 색상
+        WHEN A.moneyFinishNY = '0' THEN C.bgcolor  -- 'N'일 때 (예: 입금 대기) 기존 색상 유지
         ELSE C.bgcolor                             -- 그 외의 값은 기존 색상 유지
     END AS bgcolor
     
-    ,B.notes as customerEtc,B.contactPerson ,A.created_at ,A.ADmedia,D.name as AD_NAME,A.MoneyfinishNY 
+    ,B.notes as customerEtc,B.contactPerson ,A.created_at ,A.ADmedia,D.name as AD_NAME,A.moneyFinishNY 
     FROM schedules A INNER JOIN Customers B ON A.customerName = B.id  INNER JOIN csKind C ON A.csKind = C.id INNER JOIN ADmedia D ON A.ADmedia=D.keycode`;
 
 const getAllSchedules = async () => {
+  console.log("getAllSchedules");
   const query = `SELECT ${selectqueryinit} ORDER BY FIELD(C.title, '대관', '답사', '가부킹', '단순문의', '기타');`;
   const result = await sql.executeQuery(query);
   // console.log(result);
   return result;
 };
 const getCustomerID = async (CustomerName) => {
-  console.log("getCustomerID");
   const query = "SELECT id FROM Customers where customerName = ?";
   const result = await sql.executeQuery(query, CustomerName);
   return result[0];
 };
 
 const createSchedule = async (schedule) => {
-  const {
-    calendarId,
-    csKind,
-    ADmedia,
-    NewTitle,
-    start,
-    end,
-    startTime,
-    endTime,
-    userInt,
-    estPrice,
-    gubun,
-    etc,
-    customerName,
-    rentPlace,
-  } = schedule;
+  const { calendarId, csKind, ADmedia, NewTitle, start, end, startTime, endTime, userInt, estPrice, gubun, etc, customerName, rentPlace } = schedule;
   const customerId = await getCustomerID(customerName);
   // console.log({start:start,end:end,customerName:customerName,csKind:csKind})
-  const CheckSchedule = await GetCheckSchedule(
-    start,
-    end,
-    customerName,
-    csKind
-  );
+  const CheckSchedule = await GetCheckSchedule(start, end, customerName, csKind);
 
   // console.log('CheckSchedulelength', CheckSchedule.length)
   if (CheckSchedule.length === 0) {
@@ -85,7 +65,7 @@ const getScheduleByCoustomerId = async (id) => {
 const getScheduleById = async (id) => {
   const query = `SELECT ${selectqueryinit} WHERE A.id = ?`;
   const result = await sql.executeQuery(query, id);
-  console.log("getScheduleById", result);
+  // console.log("getScheduleById", result);
   return result[0];
 };
 
@@ -109,7 +89,7 @@ const getcsByDate = async (startDate, endDate, customerName, csKind) => {
   if (customerName == undefined) {
     customerName = "";
   }
-  console.log("getcsByDate", typeof parseInt(csKind));
+  // console.log("getcsByDate", typeof parseInt(csKind));
   let query;
   if (csKind == 0) {
     query = `SELECT ${selectqueryinit} WHERE A.created_at >= '${startDate} 00:00:00' AND A.created_at <= '${endDate} 23:59:59' and ( B.customerName like '%${customerName}%' or  A.etc like '%${customerName}%' )`;
@@ -135,7 +115,6 @@ const getScheduleByMonth = async (Month, sort) => {
   nextMonth.setMonth(date.getMonth() + 1);
   const NewPrevMonth = previousMonth.toISOString().slice(0, 7);
   const NewNextMonth = nextMonth.toISOString().slice(0, 7);
-  console.log("sort", sort);
 
   let Sort2 = "A.start";
   let Sortby = "and C.calView=1 ORDER BY A.start, C.id";
@@ -143,10 +122,10 @@ const getScheduleByMonth = async (Month, sort) => {
   let Newselectqueryinit;
   Newselectqueryinit = `A.id, B.customerName,CONCAT('[', C.title, ']', B.customerName) AS title, A.start,A.end,A.rentPlace,A.startTime,A.endTime,A.userInt,A.estPrice
     ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,    CASE 
-        WHEN A.moneyfinishNY = '1' THEN '${MoneyfinishNYcolor}' -- 'Y'일 때 (예: 입금 완료) 녹색 계열 색상
-        WHEN A.moneyfinishNY = '0' THEN C.bgcolor  -- 'N'일 때 (예: 입금 대기) 기존 색상 유지
+        WHEN A.moneyFinishNY = '1' THEN '${MoneyfinishNYcolor}' -- 'Y'일 때 (예: 입금 완료) 녹색 계열 색상
+        WHEN A.moneyFinishNY = '0' THEN C.bgcolor  -- 'N'일 때 (예: 입금 대기) 기존 색상 유지
         ELSE C.bgcolor                             -- 그 외의 값은 기존 색상 유지
-    END AS bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at ,A.ADmedia
+    END AS bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at ,A.ADmedia ,A.moneyFinishNY 
     FROM schedules A INNER JOIN Customers B ON A.customerName = B.id  INNER JOIN csKind C ON A.csKind = C.id`;
 
   switch (sort) {
@@ -154,10 +133,10 @@ const getScheduleByMonth = async (Month, sort) => {
       Sort2 = "A.created_at";
       Newselectqueryinit = `A.id, B.customerName,CONCAT('[', C.title, ']', B.customerName) AS title, A.start,A.end,A.rentPlace,A.startTime,A.endTime,A.userInt,A.estPrice
     ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,    CASE 
-        WHEN A.moneyfinishNY = '1' THEN '${MoneyfinishNYcolor}' -- 'Y'일 때 (예: 입금 완료) 녹색 계열 색상
-        WHEN A.moneyfinishNY = '0' THEN C.bgcolor  -- 'N'일 때 (예: 입금 대기) 기존 색상 유지
+        WHEN A.moneyFinishNY = '1' THEN '${MoneyfinishNYcolor}' -- 'Y'일 때 (예: 입금 완료) 녹색 계열 색상
+        WHEN A.moneyFinishNY = '0' THEN C.bgcolor  -- 'N'일 때 (예: 입금 대기) 기존 색상 유지
         ELSE C.bgcolor                             -- 그 외의 값은 기존 색상 유지
-    END AS bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at as start ,A.created_at as end , A.ADmedia
+    END AS bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at as start ,A.created_at as end , A.ADmedia,A.moneyFinishNY 
     FROM schedules A INNER JOIN Customers B ON A.customerName = B.id  INNER JOIN csKind C ON A.csKind = C.id`;
       break;
     case "START":
@@ -313,14 +292,12 @@ ORDER BY
            ${Sortby}`;
   }
 
-  console.log("querytest", query);
+  // console.log("querytest", query);
   let result = await sql.executeQuery(query);
   result = result.map((row) => ({
     ...row,
     title: Buffer.isBuffer(row.title) ? row.title.toString("utf8") : row.title,
-    category: Buffer.isBuffer(row.category)
-      ? row.category.toString("utf8")
-      : row.category,
+    category: Buffer.isBuffer(row.category) ? row.category.toString("utf8") : row.category,
   }));
 
   // console.log(result)
@@ -328,7 +305,7 @@ ORDER BY
 };
 const updateCsKind = async (update_ID) => {
   await Inint_csKind();
-  console.log(update_ID);
+  // console.log(update_ID);
   const query = `UPDATE csKind SET calView=1 where id IN(${update_ID})`;
   const result = await sql.executeQuery(query);
   return result.affectedRows > 0;
@@ -340,7 +317,7 @@ const Inint_csKind = async () => {
 };
 
 const updateSchedule = async (id, schedule) => {
-  console.log("updateSchedule", schedule);
+  // console.log("updateSchedule", schedule);
   if (schedule.customerName) {
     const customerId = await getCustomerID(schedule.customerName);
     schedule.customerName = customerId.id;
@@ -349,7 +326,7 @@ const updateSchedule = async (id, schedule) => {
   schedule.start = dayjs(schedule.start).format("YYYY-MM-DD");
   schedule.end = dayjs(schedule.end).format("YYYY-MM-DD");
 
-  console.log("schedule.customerName", schedule.customerName);
+  // console.log("schedule.customerName", schedule.customerName);
   const query = "UPDATE schedules SET ? WHERE id = ?";
   const result = await sql.executeQuery(query, [schedule, id]);
   return result.affectedRows > 0;
