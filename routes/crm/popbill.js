@@ -8,6 +8,8 @@ router.get("/kakao/Templatelist", popbillController.Templatelist);
 router.get("/kakao/TemplateContent", popbillController.TemplateContent);
 router.post("/kakao/MessageSend", popbillController.MessageSend);
 router.get("/kakao/getSendMessages", popbillController.getSendMessages);
+router.get("/kakao/SendMessages", popbillController.getSendMessages);
+router.get("/kakao/SendMessageHistory", popbillController.SendMessageHistory);
 
 router.get("/biz/checkBizInfo", popbillController.checkBizInfo);
 

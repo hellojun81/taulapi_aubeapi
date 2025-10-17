@@ -10,6 +10,9 @@ export const MessageSend = popbillKakao.MessageSend;
 export const Templatelist = popbillKakao.Templatelist;
 export const TemplateContent = popbillKakao.TemplateContent;
 export const getSendMessages = popbillKakao.getSendMessages;
+export const SendMessageHistory = popbillKakao.SendMessageHistory;
+export const SendMessageHistoryCount = popbillKakao.SendMessageHistoryCount;
+
 export const checkBizInfo = popbillBiz.checkBizInfo;
 
 export const registTaxIssue = popbillTax.registTaxIssue;

@@ -1,3 +1,4 @@
+import { schedule } from "node-cron";
 import sql from "../../lib/crm/sql.js";
 import { createSuccessCallback, createErrorCallback, kakaoService, CorpNum, UserID } from "../../util/popbillConfig.js";
 
@@ -18,7 +19,33 @@ export const getSendMessages = (req, res, next) => {
   const ReceiptNum = "025101609215300001";
   const successCallback = createSuccessCallback(req, res, "카카오 템플릿 본문 조회 성공");
   const errorCallback = createErrorCallback(req, res, "카카오 템플릿  본문 조회 실패");
+
   kakaoService.getMessages(CorpNum, ReceiptNum, UserID, successCallback, errorCallback);
+};
+
+export const SendMessageHistory = async (req, res, next) => {
+  const { scheduleId } = req.query;
+  const query = `SELECT created_at,content,receiver  FROM    message_logs WHERE scheduleId = ? and status='SENT_SUCCESS';`;
+  const value = [scheduleId];
+  const result = await sql.executeQuery(query, value);
+  console.log("sendMessageHistory");
+  return res.status(200).json({
+    scheduleId,
+    data: result,
+    message: "메시지 발송 이력 조회 성공",
+  });
+};
+export const SendMessageHistoryCount = async (req, res, next) => {
+  const { scheduleId } = req.query;
+  const query = `SELECT COUNT(*) AS historyCounter FROM    message_logs WHERE scheduleId = ? and status='SENT_SUCCESS';`;
+  const value = [scheduleId];
+  const result = await sql.executeQuery(query, value);
+  const count = result?.[0]?.historyCounter ?? 0;
+  return res.status(200).json({
+    scheduleId,
+    historyCounter: count,
+    message: "메시지 발송 이력 조회 성공",
+  });
 };
 
 export const MessageSend = async (req, res, next) => {
@@ -35,8 +62,10 @@ export const MessageSend = async (req, res, next) => {
       sndDT = "",
       UserID = "TAULAPI",
       btns = null,
+      ID,
     } = req.body;
-    console.log("MessgeSend", req.body);
+    const scheduleId = ID;
+    console.log("MessgeSend scheduleId", scheduleId);
     // 2️⃣ 필수값 검증
     if (!templateCode || !receiver || !content) {
       return res.status(400).json({
@@ -62,7 +91,9 @@ export const MessageSend = async (req, res, next) => {
         requestNum,
         status: "SENT_SUCCESS",
         errorMessage: null,
+        scheduleId,
       };
+
       await saveMessageLog(logData);
 
       res.status(200).json({
@@ -86,6 +117,7 @@ export const MessageSend = async (req, res, next) => {
         requestNum: null,
         status: "SENT_FAILURE",
         errorMessage: error.message || "Unknown error",
+        scheduleId,
       };
       await saveMessageLog(logData);
 
@@ -124,26 +156,17 @@ export const MessageSend = async (req, res, next) => {
 };
 
 const saveMessageLog = async (logData) => {
-  const {
-    templateCode,
-    sender,
-    receiver,
-    receiverName,
-    content,
-    altContent,
-    requestNum, // 접수번호 (성공 시 필수)
-    status,
-    errorMessage,
-  } = logData;
+  console.log("logData", logData);
+  const { templateCode, sender, receiver, receiverName, content, altContent, requestNum, status, errorMessage, scheduleId } = logData;
 
   const query = `
     INSERT INTO message_logs 
-    (request_num, template_code, sender, receiver, receiver_name, content, alt_content, status, error_message)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (request_num, template_code, sender, receiver, receiver_name, content, alt_content, status, error_message,scheduleId)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)
   `;
 
   // SQL 쿼리 실행에 사용할 값 배열 (순서 중요)
-  const values = [requestNum || null, templateCode, sender, receiver, receiverName, content, altContent, status, errorMessage || null];
+  const values = [requestNum || null, templateCode, sender, receiver, receiverName, content, altContent, status, errorMessage || null, scheduleId];
 
   let connection;
   try {
