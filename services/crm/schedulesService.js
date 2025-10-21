@@ -9,16 +9,18 @@ const selectqueryinit = `A.id, B.customerName,CONCAT('[', C.title, ']', B.custom
         WHEN A.moneyFinishNY = '1' THEN '${MoneyfinishNYcolor}' -- 'Y'일 때 (예: 입금 완료) 녹색 계열 색상
         WHEN A.moneyFinishNY = '0' THEN C.bgcolor  -- 'N'일 때 (예: 입금 대기) 기존 색상 유지
         ELSE C.bgcolor                             -- 그 외의 값은 기존 색상 유지
-    END AS bgcolor
-    
-    ,B.notes as customerEtc,B.contactPerson ,A.created_at ,A.ADmedia,D.name as AD_NAME,A.moneyFinishNY 
-    FROM schedules A INNER JOIN Customers B ON A.customerName = B.id  INNER JOIN csKind C ON A.csKind = C.id INNER JOIN ADmedia D ON A.ADmedia=D.keycode`;
+    END AS bgcolor ,B.notes as customerEtc,B.contactPerson ,A.created_at ,A.ADmedia,D.name as AD_NAME
+    ,A.moneyFinishNY 
+    ,(select COUNT(scheduleId)from message_logs where scheduleId=A.id) AS messageLogCount
+    ,(select COUNT(schedule_id)from tax_invoices where schedule_id=A.id) AS vatSendCount
+    FROM schedules A INNER JOIN Customers B ON A.customerName = B.id  INNER JOIN csKind C ON A.csKind = C.id 
+    INNER JOIN ADmedia D ON A.ADmedia=D.keycode`;
 
 const getAllSchedules = async () => {
-  console.log("getAllSchedules");
   const query = `SELECT ${selectqueryinit} ORDER BY FIELD(C.title, '대관', '답사', '가부킹', '단순문의', '기타');`;
+  console.log("getAllSchedules query", query);
   const result = await sql.executeQuery(query);
-  // console.log(result);
+  console.log("getAllSchedules", result);
   return result;
 };
 const getCustomerID = async (CustomerName) => {
@@ -64,8 +66,9 @@ const getScheduleByCoustomerId = async (id) => {
 };
 const getScheduleById = async (id) => {
   const query = `SELECT ${selectqueryinit} WHERE A.id = ?`;
+  console.log("query", query);
   const result = await sql.executeQuery(query, id);
-  // console.log("getScheduleById", result);
+  console.log("getScheduleById", result);
   return result[0];
 };
 
@@ -146,14 +149,8 @@ const getScheduleByMonth = async (Month, sort) => {
       Sort2 = "A.end";
       break;
     case "CREATECNT":
-      // Sort2 = "A.created_at";
-      // Newselectqueryinit = ` 'time' as category, DATE(A.created_at) AS start, DATE(A.created_at) AS end,A.ADmedia,CONCAT(B.name, '*', COUNT(*), '건') AS title FROM schedules A JOIN ADmedia B ON A.ADmedia = B.keycode JOIN csKind C ON C.id=1  and A.csKind=C.id `;
-      // Sortby = "GROUP BY created_at, A.ADmedia ORDER BY created_at, A.ADmedia";
       break;
     case "ADSPEND":
-      // Sort2 = "A.created_at";
-      // Newselectqueryinit = ` 'time' as category, DATE(A.created_at) AS start, DATE(A.created_at) AS end,A.ADmedia,CONCAT(B.name, '*', COUNT(*), '건') AS title FROM schedules A JOIN ADmedia B ON A.ADmedia = B.keycode JOIN csKind C ON C.id=1  and A.csKind=C.id `;
-      // Sortby = "GROUP BY date ORDER BY date ASC";
       break;
   }
 
@@ -211,42 +208,6 @@ ORDER BY
     WHEN 'summary' THEN 1
   END;
 `;
-    //   query = `(
-    //   -- 일정 데이터
-    //   SELECT
-    //     'time' AS category,
-    //     DATE(A.created_at) AS start,
-    //     DATE(A.created_at) AS end,
-    //     A.ADmedia,
-    //     NULL AS dummy,
-    //     CONCAT(B.name, '*', COUNT(*), '건') AS title
-    //   FROM schedules A
-    //   JOIN ADmedia B ON A.ADmedia = B.keycode
-    //   JOIN csKind C ON C.id = 1 AND A.csKind = C.id
-    //   WHERE   LEFT(A.created_at, 7) = '${datePrefix}'
-    //   GROUP BY DATE(A.created_at), A.ADmedia
-    // )
-    // UNION ALL
-    // (
-    //   -- 날짜별 총 광고비
-    //   SELECT
-    //     'time' AS category,
-    //     date AS start,
-    //     date AS end,
-    //     NULL AS ADmedia,
-    //     NULL AS dummy,
-    //     CONCAT('총 광고비: ', FORMAT(SUM(spend), 0), '원') AS title
-    //   FROM AdPerformance
-    //   WHERE LEFT(date, 7) = '${datePrefix}'
-    //   GROUP BY date
-    // )
-    // ORDER BY
-    //   start,
-    //   CASE category
-    //     WHEN 'time' THEN 0
-    //     WHEN 'summary' THEN 1
-    //   END;
-    // `;
   } else if (sort === "ADSPEND") {
     // ✅ sort가 "ADSPEND"인 경우 (총 광고비 합계 출력)
     const datePrefix = `${year}-${month}`;
@@ -292,7 +253,7 @@ ORDER BY
            ${Sortby}`;
   }
 
-  // console.log("querytest", query);
+  console.log("querytest", query);
   let result = await sql.executeQuery(query);
   result = result.map((row) => ({
     ...row,

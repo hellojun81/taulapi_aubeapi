@@ -16,22 +16,8 @@ export const SendMessageHistoryCount = popbillKakao.SendMessageHistoryCount;
 export const checkBizInfo = popbillBiz.checkBizInfo;
 
 export const registTaxIssue = popbillTax.registTaxIssue;
+export const latestTransactions = popbillBank.latestTransactions;
 
-export const latestTransactions = async (req, res) => {
-  try {
-    const result = await popbillBank.latestTransactions();
-    res.json({
-      message: "은행 거래 내역 조회 및 DB 저장이 성공적으로 완료되었습니다.",
-      data: result,
-    });
-  } catch (error) {
-    console.error("latestTransactions 처리 중 오류:", error.message);
-    res.status(500).json({
-      message: "거래 내역 조회 및 저장에 실패했습니다.",
-      error: error.message,
-    });
-  }
-};
 export const get_DB_BankTransactions = async (req, res) => {
   try {
     const { startDate, endDate, tradeType, description } = req.query;

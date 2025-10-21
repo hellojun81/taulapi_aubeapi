@@ -4,7 +4,7 @@ import sql from "../../lib/crm/sql.js";
 
 import { createSuccessCallback, createErrorCallback, easyFinBankService, CorpNum, UserID, BANK_ACCOUNT } from "../../util/popbillConfig.js";
 
-export const latestTransactions = async () => {
+export const latestTransactions = async (req, res) => {
   let JobID;
   const startDate = dayjs().subtract(30, "day").format("YYYYMMDD");
   const endDate = dayjs().format("YYYYMMDD");
@@ -13,9 +13,64 @@ export const latestTransactions = async () => {
   } catch (error) {
     throw new Error("은행 계좌 거래 내역 요청 JobID 발급 실패: " + error.message);
   }
-  return new Promise((resolve, reject) => {
-    easyFinBankService.search(CorpNum, JobID, "A", "", 1, 1000, "A", UserID, createSuccessCallback, createErrorCallback);
+  const searchResult = await new Promise((resolve, reject) => {
+    easyFinBankService.search(
+      CorpNum,
+      JobID,
+      "A",
+      "",
+      1,
+      1000,
+      "A",
+      UserID,
+      (result) => {
+        resolve(result);
+      },
+      (error) => {
+        reject(new Error(error.message || "거래내역 조회 중 오류 발생"));
+      }
+    );
   });
+  const saveData = await saveTransactions(searchResult.list);
+  res.json(`${saveData.affectedRows}건 업데이트 완료`);
+};
+
+export const AutolatestTransactions = async () => {
+  let JobID;
+  const startDate = dayjs().subtract(30, "day").format("YYYYMMDD");
+  const endDate = dayjs().format("YYYYMMDD");
+  try {
+    JobID = await getJobID(startDate, endDate);
+    const searchResult = await new Promise((resolve, reject) => {
+      // 팝빌 SDK가 success/error 콜백을 분리하여 받는다고 가정하고 처리
+      easyFinBankService.search(
+        CorpNum,
+        JobID,
+        "A",
+        "",
+        1,
+        1000,
+        "A",
+        UserID,
+        (result) => {
+          resolve(result);
+        },
+
+        (error) => {
+          reject(new Error(error.message || "거래내역 조회 중 오류 발생"));
+        }
+      );
+    });
+    const saveData = await saveTransactions(searchResult.list);
+    const totalCount = searchResult && searchResult.TotalCount ? searchResult.TotalCount : 0;
+    console.log(`✅ 은행거래내역 조회 및 업데이트 완료. 총 ${totalCount}건 조회됨.`);
+  } catch (error) {
+    if (error.message.includes("JobID 발급 실패")) {
+      console.error(`🚨 FATAL 오류: ${error.message}`);
+    } else {
+      console.error(`🚨 latestTransactions 처리 중 오류: ${error.message}`);
+    }
+  }
 };
 
 export const saveTransactions = async (transactions) => {
@@ -65,7 +120,6 @@ export const saveTransactions = async (transactions) => {
             accOut = VALUES(accOut),
             regDT = VALUES(regDT);
     `;
-
   try {
     const result = await sql.executeQuery(query, [valuesForBulkInsert]);
     return result;

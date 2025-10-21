@@ -36,6 +36,7 @@ export const BANK_ACCOUNT = process.env.POPBILL_BANK_ACCOUNT;
  */
 export const createSuccessCallback = (req, res, successMessage = "요청 성공") => {
   return (result) => {
+    // console.log(`Success: Popbill API Call [${req.path}]`, result);
     console.log(`Success: Popbill API Call [${req.path}]`, result);
 
     // 팝빌 API마다 'result'의 형태가 다르므로, 필요한 데이터는 여기서 추출

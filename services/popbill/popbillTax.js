@@ -1,8 +1,7 @@
 import { createSuccessCallback, createErrorCallback, taxinvoiceService, CorpNum, UserID } from "../../util/popbillConfig.js";
-
+import sql from "../../lib/crm/sql.js";
 export const registTaxIssue = async (req, res, next) => {
-  const successCallback = createSuccessCallback(req, res, "세금계산서 발행 성공");
-  const errorCallback = createErrorCallback(req, res, "세금계산서 발행 실패");
+  // ... (makeMgtKey, body, src, 정규화/변수 설정 로직 유지) ...
   const makeMgtKey = () => `TI-${Date.now()}`;
   try {
     const body = req.body || {};
@@ -19,13 +18,14 @@ export const registTaxIssue = async (req, res, next) => {
     const purposeType = src.purposeType || "영수";
     const chargeDirection = src.chargeDirection || "정과금";
     const writeDate = yyyymmdd(src.writeDate);
-
+    const scheduleId = src.scheduleId;
     // 합계
     const supplyCostTotal = toStrNum(src.supplyCostTotal);
     const taxTotal = toStrNum(src.taxTotal);
     const totalAmount = toStrNum(src.totalAmount);
 
     // 공급자
+    // CORP_NUM 변수가 정의되어 있다고 가정
     const invoicerCorpNum = onlyDigits(src.invoicerCorpNum || CORP_NUM);
     const invoicerMgtKey = src.invoicerMgtKey || makeMgtKey();
     const invoicerCorpName = src.invoicerCorpName || "";
@@ -106,58 +106,93 @@ export const registTaxIssue = async (req, res, next) => {
       serialNum: src.serialNum || "1",
       remark: src.remark || "",
     };
-    taxinvoiceService.registIssue(CorpNum, Taxinvoice, UserID, successCallback, errorCallback);
+    // console.log({ "Number(scheduleId)": Number(scheduleId), Taxinvoice: Taxinvoice });
+    // await saveTaxInvoiceToDB(Number(scheduleId), Taxinvoice, 1);
+    // return;
+    // Popbill API 호출 (Promise로 감싸서 await으로 결과 수신)
+    const popbillResult = await new Promise((resolve, reject) => {
+      // taxinvoiceService, CorpNum, UserID는 임포트되어 있어야 합니다.
+      taxinvoiceService.registIssue(
+        CorpNum,
+        Taxinvoice,
+        UserID,
+        (result) => {
+          resolve(result); // 성공 시 result 객체를 resolve
+        },
+        (error) => {
+          reject(error); // 오류 시 error 객체(팝빌 오류 응답 포함)를 reject
+        }
+      );
+    });
+
+    // DB 저장 함수 호출 (scheduleId가 정의되어야 함)
+    // saveTaxInvoiceToDB 함수는 별도 파일에서 임포트되어야 합니다.
+    await saveTaxInvoiceToDB(Number(scheduleId), Taxinvoice, popbillResult);
+
+    // 🚨 2. 성공 응답 반환 (누락된 부분)
+    return res.status(200).json({
+      message: "세금계산서 발행 및 DB 저장 성공",
+      popbill: popbillResult,
+      mgtKey: Taxinvoice.invoicerMgtKey,
+    });
   } catch (err) {
-    console.error(err);
-    return errorCallback(err);
+    console.error("세금계산서 처리 오류:", err);
+
+    // 🚨 3. 에러 처리 로직 수정 (errorCallback 대신 직접 응답)
+    const errorBody = err?.response ? JSON.parse(err.response) : err || {};
+    const errorMessage = errorBody.message || err.message || "알 수 없는 오류가 발생했습니다.";
+    const errorCode = errorBody.code || err.code;
+
+    return res.status(500).json({
+      message: "세금계산서 발행 처리 실패",
+      error: errorMessage,
+      popbillErrorCode: errorCode,
+    });
   }
 };
 
-// export const registTaxIssue = async (req, res, next) => {
-//   const successCallback = createSuccessCallback(req, res, "세금계산서 발행 성공");
-//   const errorCallback = createErrorCallback(req, res, "세금계산서 발행 실패");
-//   const Taxinvoice = {
-//     /************************************************************************
-//      * 세금계산서 공통 필수 항목
-//      **************************************************************************/
-//     issueType: "정발행", // [필수] 발행형태: (정발행, 역발행, 위수탁) 중 택 1
-//     taxType: "과세", // [필수] 과세형태: (과세, 영세, 면세) 중 택 1
-//     chargeDirection: "정과금", // [필수] 과금방향: (정과금, 역과금) 중 택 1
-//     writeDate: "20251001", // [필수] 작성일자: 형식 yyyyMMdd
-//     purposeType: "영수", // [필수] 영수/청구: (영수, 청구, 없음) 중 택 1
-//     supplyCostTotal: "10000", // [필수] 공급가액 합계
-//     taxTotal: "1000", // [필수] 세액 합계
-//     totalAmount: "11000", // [필수] 합계금액 (공급가액 합계 + 세액 합계)
-//     /************************************************************************
-//      * 공급자 정보 (필수)
-//      **************************************************************************/
-//     invoicerCorpNum: CorpNum, // [필수] 공급자 사업자번호 ('-' 제외)
-//     invoicerMgtKey: mgtKey, // [조건부 필수] 정발행시 공급자 문서번호
-//     invoicerCorpName: "공급자 상호", // [필수] 공급자 상호
-//     invoicerCEOName: "대표자 성명", // [필수] 공급자 대표자 성명
-//     /************************************************************************
-//      * 공급받는자 정보 (필수)
-//      **************************************************************************/
-//     invoiceeType: "사업자", // [필수] 공급받는자 유형: (사업자, 개인, 외국인) 중 택 1
-//     invoiceeCorpNum: "8888888888", // [필수] 공급받는자 등록번호 ('-' 제외)
-//     invoiceeCorpName: "공급받는자 상호", // [필수] 공급받는자 상호
-//     invoiceeCEOName: "공급받는자 대표자 성명", // [필수] 공급받는자 대표자 성명
-//     /************************************************************************
-//      * 품목 상세정보 (실제 발행을 위해 최소 1개 항목 추가)
-//      **************************************************************************/
-//     detailList: [
-//       {
-//         serialNum: 1, // 일련번호
-//         purchaseDT: "20251001", // 거래일자
-//         itemName: "서비스 이용료",
-//         spec: "1건",
-//         qty: "1", // 수량
-//         unitCost: "10000", // 단가
-//         supplyCost: "10000", // 공급가액 (10000)
-//         tax: "1000", // 세액 (1000)
-//         remark: "필수 품목",
-//       },
-//     ],
-//   };
-//   taxinvoiceService.registIssue(CorpNum, Taxinvoice, UserID, successCallback, errorCallback);
-// };
+// 이 함수는 별도의 DB 서비스 파일 (예: taxInvoiceDBService.js)에 위치해야 합니다.
+// db.query 등 DB 클라이언트 임포트는 필요합니다. (예: import db from "../../config/db.js";)
+
+/**
+ * 발행된 세금계산서의 핵심 정보를 DB에 저장합니다.
+ * @param {number} scheduleId - 연관된 스케줄 ID
+ * @param {object} taxInvoiceData - Popbill 요청 객체 (Taxinvoice)
+ * @param {object} popbillResult - Popbill API 응답 결과 객체
+ */
+export const saveTaxInvoiceToDB = async (scheduleId, taxInvoiceData, popbillResult) => {
+  // 팝빌 성공 응답 코드가 아닌 경우 DB 저장을 시도하지 않습니다.
+  if (popbillResult.code !== 1) {
+    throw new Error(`Popbill API 응답 오류: Code ${popbillResult.code}, Message: ${popbillResult.message}`);
+  }
+
+  const query = `
+      INSERT INTO tax_invoices (
+        schedule_id, popbill_mgt_key, popbill_invoicer_corpnum, popbill_tx_id, issue_type, tax_type, purpose_type, write_date,
+        supply_cost_total, tax_total, total_amount, 
+        invoicee_corp_num, invoicee_corp_name, invoicee_contact_name, invoicee_email, is_issued
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+    `;
+
+  const insertValues = [
+    scheduleId, // 🚨 schedule_id 추가
+    taxInvoiceData.invoicerMgtKey,
+    taxInvoiceData.invoicerCorpNum,
+    popbillResult.tqsid || null,
+    taxInvoiceData.issueType,
+    taxInvoiceData.taxType,
+    taxInvoiceData.purposeType,
+    taxInvoiceData.writeDate,
+    taxInvoiceData.supplyCostTotal,
+    taxInvoiceData.taxTotal,
+    taxInvoiceData.totalAmount,
+    taxInvoiceData.invoiceeCorpNum,
+    taxInvoiceData.invoiceeCorpName,
+    taxInvoiceData.invoiceeContactName1,
+    taxInvoiceData.invoiceeEmail1,
+  ];
+  const result = await sql.executeQuery(query, insertValues);
+  // 🚨 실제 DB 삽입 로직 (사용자의 DB 클라이언트에 맞게 수정 필요)
+
+  console.log(`[DB] 세금계산서 저장 완료: ScheduleID=${scheduleId}, MgtKey=${taxInvoiceData.invoicerMgtKey}`);
+};

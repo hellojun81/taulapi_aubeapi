@@ -15,8 +15,10 @@ const pool = mysql.createPool({
 });
 
 export const latestTransactions = async () => {
+  const timerLabel = "latestTransactions 실행 시간";
+  console.time(timerLabel);
   try {
-    const result = await popbillBank.latestTransactions();
+    const result = await popbillBank.AutolatestTransactions();
     console.log("은행거래내역 업데이트 완료");
   } catch (error) {
     console.error("latestTransactions 처리 중 오류:", error.message);
@@ -85,6 +87,7 @@ const startSchedules = async () => {
   cron.schedule("* * * * *", executeScheduledTasks);
   // 매일 자정에 jobs 테이블을 리셋하는 스케줄러
   cron.schedule("0 0 * * *", resetJobsTable);
+  // cron.schedule("* * * * *", latestTransactions);
   cron.schedule("*/10 * * * *", latestTransactions);
 };
 

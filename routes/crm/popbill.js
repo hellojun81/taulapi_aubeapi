@@ -10,6 +10,7 @@ router.post("/kakao/MessageSend", popbillController.MessageSend);
 router.get("/kakao/getSendMessages", popbillController.getSendMessages);
 router.get("/kakao/SendMessages", popbillController.getSendMessages);
 router.get("/kakao/SendMessageHistory", popbillController.SendMessageHistory);
+router.get("/kakao/SendMessageHistoryCount", popbillController.SendMessageHistoryCount);
 
 router.get("/biz/checkBizInfo", popbillController.checkBizInfo);
 
