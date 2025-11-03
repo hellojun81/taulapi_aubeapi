@@ -5,7 +5,9 @@ import dayjs from "dayjs";
 // 모든 스케줄 가져오기
 const getAllSchedules = async (req, res) => {
   try {
-    const schedules = await schedulesService.getAllSchedules();
+    const { csKindIds } = req.query;
+    console.log("getAllSchedules csKindIds", csKindIds);
+    const schedules = await schedulesService.getAllSchedules(req, res);
     res.json(schedules);
   } catch (error) {
     console.error("Error fetching schedules:", error);
@@ -30,6 +32,7 @@ const getScheduleById = async (req, res) => {
         break;
       case "schedules":
         if (SearchMonth) {
+          console.log("SearchMonth", SearchMonth);
           result = await schedulesService.getScheduleByMonth(SearchMonth, sort);
         } else {
           result = await schedulesService.getScheduleById(SearchMonth);
@@ -105,7 +108,7 @@ const updateSchedule = async (req, res) => {
     const { id } = req.params;
     const updatedSchedule = req.body;
     const { update_ID, SearchMonth } = req.query;
-    // console.log({ 스케쥴수정: req.params, id: id, update_ID: update_ID, SearchMonth: SearchMonth, updatedSchedule: updatedSchedule });
+    console.log({ 스케쥴수정: req.params, id: id, update_ID: update_ID, SearchMonth: SearchMonth, updatedSchedule: updatedSchedule });
     let result;
 
     if (id === "getCsKind") {
@@ -114,6 +117,7 @@ const updateSchedule = async (req, res) => {
       } else {
         result = await schedulesService.Inint_csKind();
       }
+      console.log("updateSchedule for getScheduleByMonth");
       result = await schedulesService.getScheduleByMonth(SearchMonth);
     } else {
       result = await schedulesService.updateSchedule(id, updatedSchedule);

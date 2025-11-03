@@ -106,10 +106,7 @@ export const registTaxIssue = async (req, res, next) => {
       serialNum: src.serialNum || "1",
       remark: src.remark || "",
     };
-    // console.log({ "Number(scheduleId)": Number(scheduleId), Taxinvoice: Taxinvoice });
-    // await saveTaxInvoiceToDB(Number(scheduleId), Taxinvoice, 1);
-    // return;
-    // Popbill API 호출 (Promise로 감싸서 await으로 결과 수신)
+
     const popbillResult = await new Promise((resolve, reject) => {
       // taxinvoiceService, CorpNum, UserID는 임포트되어 있어야 합니다.
       taxinvoiceService.registIssue(
@@ -125,8 +122,6 @@ export const registTaxIssue = async (req, res, next) => {
       );
     });
 
-    // DB 저장 함수 호출 (scheduleId가 정의되어야 함)
-    // saveTaxInvoiceToDB 함수는 별도 파일에서 임포트되어야 합니다.
     await saveTaxInvoiceToDB(Number(scheduleId), Taxinvoice, popbillResult);
 
     // 🚨 2. 성공 응답 반환 (누락된 부분)
@@ -138,7 +133,6 @@ export const registTaxIssue = async (req, res, next) => {
   } catch (err) {
     console.error("세금계산서 처리 오류:", err);
 
-    // 🚨 3. 에러 처리 로직 수정 (errorCallback 대신 직접 응답)
     const errorBody = err?.response ? JSON.parse(err.response) : err || {};
     const errorMessage = errorBody.message || err.message || "알 수 없는 오류가 발생했습니다.";
     const errorCode = errorBody.code || err.code;
@@ -150,9 +144,6 @@ export const registTaxIssue = async (req, res, next) => {
     });
   }
 };
-
-// 이 함수는 별도의 DB 서비스 파일 (예: taxInvoiceDBService.js)에 위치해야 합니다.
-// db.query 등 DB 클라이언트 임포트는 필요합니다. (예: import db from "../../config/db.js";)
 
 /**
  * 발행된 세금계산서의 핵심 정보를 DB에 저장합니다.

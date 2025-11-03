@@ -17,6 +17,7 @@ export const checkBizInfo = popbillBiz.checkBizInfo;
 
 export const registTaxIssue = popbillTax.registTaxIssue;
 export const latestTransactions = popbillBank.latestTransactions;
+export const singleMemoUpdate = popbillBank.singleMemoUpdate;
 
 export const get_DB_BankTransactions = async (req, res) => {
   try {

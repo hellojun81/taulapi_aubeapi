@@ -16,11 +16,10 @@ const selectqueryinit = `A.id, B.customerName,CONCAT('[', C.title, ']', B.custom
     FROM schedules A INNER JOIN Customers B ON A.customerName = B.id  INNER JOIN csKind C ON A.csKind = C.id 
     INNER JOIN ADmedia D ON A.ADmedia=D.keycode`;
 
-const getAllSchedules = async () => {
-  const query = `SELECT ${selectqueryinit} ORDER BY FIELD(C.title, '대관', '답사', '가부킹', '단순문의', '기타');`;
-  console.log("getAllSchedules query", query);
+const getAllSchedules = async (req, res) => {
+  const { csKindIds } = req.query;
+  const query = `SELECT ${selectqueryinit} where A.csKind IN (${csKindIds}) ORDER BY FIELD(C.title, '대관', '답사', '가부킹', '단순문의', '기타');`;
   const result = await sql.executeQuery(query);
-  console.log("getAllSchedules", result);
   return result;
 };
 const getCustomerID = async (CustomerName) => {
@@ -32,10 +31,8 @@ const getCustomerID = async (CustomerName) => {
 const createSchedule = async (schedule) => {
   const { calendarId, csKind, ADmedia, NewTitle, start, end, startTime, endTime, userInt, estPrice, gubun, etc, customerName, rentPlace } = schedule;
   const customerId = await getCustomerID(customerName);
-  // console.log({start:start,end:end,customerName:customerName,csKind:csKind})
   const CheckSchedule = await GetCheckSchedule(start, end, customerName, csKind);
 
-  // console.log('CheckSchedulelength', CheckSchedule.length)
   if (CheckSchedule.length === 0) {
     const query = `INSERT INTO schedules (calendarId, csKind,ADmedia,title, start, end, startTime,endTime, userInt,estPrice,gubun,etc, customerName, rentPlace)VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
     const result = await sql.executeQuery(query, [
@@ -106,10 +103,12 @@ const getcsByDate = async (startDate, endDate, customerName, csKind) => {
 };
 
 const getScheduleByMonth = async (Month, sort) => {
+  // console.log({ "getScheduleByMonth Month": Month, sort: sort });
   const year = Month.substring(0, 4);
   const month = Month.substring(5, 7); // 9월이지만 0부터 시작하므로 8
   const date = new Date(year, month);
   let query;
+
   // 이전 달
   const previousMonth = new Date(date);
   previousMonth.setMonth(date.getMonth() - 1);
@@ -157,7 +156,7 @@ const getScheduleByMonth = async (Month, sort) => {
   if (sort === undefined) {
     Sort2 = "A.start";
   }
-  // CAST(CONCAT('총 광고비: ', FORMAT(SUM(spend), 0), '원') AS CHAR) AS title
+
   if (sort === "CREATECNT") {
     // ✅ sort가 "cnt"인 경우
     const datePrefix = `${year}-${month}`;
@@ -261,7 +260,7 @@ ORDER BY
     category: Buffer.isBuffer(row.category) ? row.category.toString("utf8") : row.category,
   }));
 
-  // console.log(result)
+  // console.log(result);
   return result;
 };
 const updateCsKind = async (update_ID) => {
@@ -278,16 +277,12 @@ const Inint_csKind = async () => {
 };
 
 const updateSchedule = async (id, schedule) => {
-  // console.log("updateSchedule", schedule);
   if (schedule.customerName) {
     const customerId = await getCustomerID(schedule.customerName);
     schedule.customerName = customerId.id;
   }
-
   schedule.start = dayjs(schedule.start).format("YYYY-MM-DD");
   schedule.end = dayjs(schedule.end).format("YYYY-MM-DD");
-
-  // console.log("schedule.customerName", schedule.customerName);
   const query = "UPDATE schedules SET ? WHERE id = ?";
   const result = await sql.executeQuery(query, [schedule, id]);
   return result.affectedRows > 0;

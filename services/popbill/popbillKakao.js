@@ -3,7 +3,7 @@ import sql from "../../lib/crm/sql.js";
 import { createSuccessCallback, createErrorCallback, kakaoService, CorpNum, UserID } from "../../util/popbillConfig.js";
 
 export const Templatelist = async (req, res, next) => {
-  const successCallback = createSuccessCallback(req, res, "카카오 템플릿 목록 조회 성공");
+  const successCallback = customSuccessCallback(req, res, "카카오 템플릿 목록 조회 성공");
   const errorCallback = createErrorCallback(req, res, "카카오 템플릿 목록 조회 실패");
   kakaoService.listATSTemplate(CorpNum, UserID, successCallback, errorCallback);
 };
@@ -179,4 +179,34 @@ const saveMessageLog = async (logData) => {
   } finally {
     if (connection) connection.release(); // 사용 후 연결을 풀에 반환
   }
+};
+
+const prioritizeTemplate = (result) => {
+  const TARGET_TEMPLATE_CODE = "025100000319";
+
+  const data = result ? [...result] : [];
+
+  const targetIndex = data.findIndex((item) => item.templateCode && item.templateCode.trim() === TARGET_TEMPLATE_CODE);
+
+  if (targetIndex > 0) {
+    // 템플릿을 배열에서 제거하고, 그 요소를 배열 맨 앞에 다시 삽입합니다.
+    const targetTemplate = data.splice(targetIndex, 1)[0];
+    data.unshift(targetTemplate);
+  }
+
+  // 수정된 data 배열로 결과 객체를 반환합니다.
+  return {
+    ...result,
+    data: data,
+  };
+};
+
+// 커스텀 성공 콜백 함수: 데이터를 조작한 후 응답합니다.
+const customSuccessCallback = (req, res, message) => (result) => {
+  console.log("modifiedResult", result);
+  const modifiedResult = prioritizeTemplate(result);
+  return res.status(200).json({
+    message: message,
+    data: modifiedResult.data, // data 필드만 포함하여 응답 구조를 유지
+  });
 };

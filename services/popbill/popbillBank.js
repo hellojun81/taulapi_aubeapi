@@ -26,8 +26,12 @@ export const latestTransactions = async (req, res) => {
       (result) => {
         resolve(result);
       },
-      (error) => {
-        reject(new Error(error.message || "거래내역 조회 중 오류 발생"));
+       (error) => {
+        const msg =
+          (error && error.message) ||
+          (typeof error === "string" ? error : "") ||
+          "거래내역 조회 중 오류 발생";
+        reject(new Error(msg));
       }
     );
   });
@@ -159,10 +163,12 @@ export const get_DB_BankTransactions = async (startDate, endDate, tradeType, des
                 remark1 LIKE CONCAT('%', ?, '%') OR 
                 remark2 LIKE CONCAT('%', ?, '%') OR 
                 remark3 LIKE CONCAT('%', ?, '%') OR 
-                remark4 LIKE CONCAT('%', ?, '%')
+                remark4 LIKE CONCAT('%', ?, '%') OR
+                memo LIKE CONCAT('%', ?, '%') 
             )
         `;
     whereClauses.push(likeCondition);
+    queryParams.push(description);
     queryParams.push(description);
     queryParams.push(description);
     queryParams.push(description);
@@ -306,5 +312,26 @@ export const updateMoneyfinish = async (req, res) => {
       message: "입금완료 처리를 중 오류가 발생하였습니다.",
       error: error.message,
     };
+  }
+};
+
+export const singleMemoUpdate = async (req, res) => {
+  const { tid, trserial } = req.params;
+  const { pay_type, memo } = req.body;
+  try {
+    console.log({ pay_type: pay_type, memo: memo, tid: tid });
+    if (!tid || !trserial) {
+      return res.status(400).json({ message: "TID 또는 거래번호(trserial)가 누락되었습니다." });
+    }
+    const query = `
+      UPDATE bank_transactions
+      SET pay_type = ?, memo = ?, regDT = NOW()
+      WHERE tid = ? AND trserial = ?
+    `;
+    const result = await sql.executeQuery(query, [pay_type, memo, tid, trserial]);
+    res.json({ message: "거래 정보가 성공적으로 업데이트되었습니다." });
+  } catch (error) {
+    console.error("❌ DB 업데이트 오류:", error);
+    res.status(500).json({ message: "서버 오류로 거래 정보를 업데이트하지 못했습니다." });
   }
 };

@@ -88,7 +88,17 @@ const startSchedules = async () => {
   // 매일 자정에 jobs 테이블을 리셋하는 스케줄러
   cron.schedule("0 0 * * *", resetJobsTable);
   // cron.schedule("* * * * *", latestTransactions);
-  cron.schedule("*/10 * * * *", latestTransactions);
+  // cron.schedule("*/10 * * * *", latestTransactions);
+  let running = false;
+cron.schedule("* * * * *", async () => {
+  if (running) return;
+  running = true;
+  try {
+    await latestTransactions();
+  } finally {
+    running = false;
+  }
+});
 };
 
 export default { startSchedules };
