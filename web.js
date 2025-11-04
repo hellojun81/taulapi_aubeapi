@@ -23,7 +23,7 @@ const port = process.env.PORT || 8001;
 
 app.use(
   cors({
-    origin: 'http://aubestudios.cafe24.com', 
+    origin: true, 
     credentials: true, // 크로스 도메인 허용
     methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD", "DELETE"],
   })
