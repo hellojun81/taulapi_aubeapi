@@ -33,7 +33,7 @@ app.get("/", (req, res) => {
   res.json("welcome aubeCrm ^^");
 });
 
-app.use(AdRoutes); // ✅ 여기서 경로 붙이기
+// app.use(AdRoutes); // ✅ 여기서 경로 붙이기
 app.get("/login", async (req, res) => {
   try {
     console.log("process.env.DB_HOST", process.env.DB_HOST);
@@ -63,9 +63,9 @@ app.use("/api/customers", customersRoutes);
 app.use("/api/filmmakers", filmmakersRoutes);
 app.use("/api/schedules", scheduleRoutes);
 app.use("/api/setup", setupRoutes);
-app.use("/api/sms", smsRoutes);
-app.use("/api/estimates", estimatesRoutes);
-app.use("/api/popbill", popbillRoutes);
+// app.use("/api/sms", smsRoutes);
+// app.use("/api/estimates", estimatesRoutes);
+// app.use("/api/popbill", popbillRoutes);
 
 autoschedules.startSchedules();
 httpServer.listen(port, () => {
