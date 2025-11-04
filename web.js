@@ -36,7 +36,7 @@ app.get("/", (req, res) => {
 
 app.use(AdRoutes); // ✅ 여기서 경로 붙이기
 app.get("/login", async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', 'http://aubestudios.cafe24.com');
+    // res.setHeader('Access-Control-Allow-Origin', 'http://aubestudios.cafe24.com');
   try {
      const { id, pw } = req.query;
     if (!id || !pw) {
@@ -56,16 +56,16 @@ app.get("/login", async (req, res) => {
   }
 });
 
-app.use("/api/customers", customersRoutes);
-app.use("/api/filmmakers", filmmakersRoutes);
-app.use("/api/schedules", scheduleRoutes);
-app.use("/api/setup", setupRoutes);
-// app.use("/api/bank", bankRoutes);
-app.use("/api/sms", smsRoutes);
-app.use("/api/estimates", estimatesRoutes);
-app.use("/api/popbill", popbillRoutes);
+// app.use("/api/customers", customersRoutes);
+// app.use("/api/filmmakers", filmmakersRoutes);
+// app.use("/api/schedules", scheduleRoutes);
+// app.use("/api/setup", setupRoutes);
+// app.use("/api/sms", smsRoutes);
+// app.use("/api/estimates", estimatesRoutes);
+// app.use("/api/popbill", popbillRoutes);
+// autoschedules.startSchedules();
 
-autoschedules.startSchedules();
+
 httpServer.listen(port, () => {
   console.log(`Server started on port ${port}`);
 });
