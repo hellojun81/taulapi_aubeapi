@@ -8,7 +8,7 @@ import customersRoutes from "./routes/crm/customers.js";
 import scheduleRoutes from "./routes/crm/schedules.js";
 import setupRoutes from "./routes/crm/setup.js";
 import filmmakersRoutes from "./routes/crm/filmmakers.js";
-import autoschedules from "./scheduler/crm/autoschedules.js";
+// import autoschedules from "./scheduler/crm/autoschedules.js";
 // import bankRoutes from "./routes/crm/bank.js";
 // import smsRoutes from "./routes/crm/smsTemplates.js";
 // import estimatesRoutes from "./routes/crm/estimates.js";
