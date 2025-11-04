@@ -7,6 +7,7 @@ import fs from "fs";
 import os from "os";
 import { fileURLToPath, pathToFileURL } from "url";
 
+// const ejs = require("ejs"); 
 const router = express.Router();
 
 const __filename = fileURLToPath(import.meta.url);
