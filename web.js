@@ -10,11 +10,11 @@ import setupRoutes from "./routes/crm/setup.js";
 import filmmakersRoutes from "./routes/crm/filmmakers.js";
 // import autoschedules from "./scheduler/crm/autoschedules.js";
 // import bankRoutes from "./routes/crm/bank.js";
-// import smsRoutes from "./routes/crm/smsTemplates.js";
-// import estimatesRoutes from "./routes/crm/estimates.js";
-// import AdRoutes from "./routes/ad-api/AdRoutes.js";
-// import "./scheduler/ad-api/dailyCollector.js";
-// import popbillRoutes from "./routes/crm/popbill.js";
+import smsRoutes from "./routes/crm/smsTemplates.js";
+import estimatesRoutes from "./routes/crm/estimates.js";
+import AdRoutes from "./routes/ad-api/AdRoutes.js";
+import "./scheduler/ad-api/dailyCollector.js";
+import popbillRoutes from "./routes/crm/popbill.js";
 dotenv.config();
 const app = express();
 const httpServer = http.createServer(app);
@@ -59,13 +59,13 @@ app.get("/login", async (req, res) => {
   }
 });
 
-// app.use("/api/customers", customersRoutes);
-// app.use("/api/filmmakers", filmmakersRoutes);
-// app.use("/api/schedules", scheduleRoutes);
-// app.use("/api/setup", setupRoutes);
-// app.use("/api/sms", smsRoutes);
-// app.use("/api/estimates", estimatesRoutes);
-// app.use("/api/popbill", popbillRoutes);
+app.use("/api/customers", customersRoutes);
+app.use("/api/filmmakers", filmmakersRoutes);
+app.use("/api/schedules", scheduleRoutes);
+app.use("/api/setup", setupRoutes);
+app.use("/api/sms", smsRoutes);
+app.use("/api/estimates", estimatesRoutes);
+app.use("/api/popbill", popbillRoutes);
 
 // autoschedules.startSchedules();
 httpServer.listen(port, () => {
