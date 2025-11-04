@@ -23,7 +23,7 @@ const port = process.env.PORT || 8001;
 
 app.use(
   cors({
-    origin: 'http://aubestudios.cafe24.com', // 
+    origin: 'http://aubestudios.cafe24.com', 
     credentials: true, // 크로스 도메인 허용
     methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD", "DELETE"],
   })
@@ -36,19 +36,15 @@ app.get("/", (req, res) => {
 
 app.use(AdRoutes); // ✅ 여기서 경로 붙이기
 app.get("/login", async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', 'http://aubestudios.cafe24.com');
   try {
-    // console.log("process.env.DB_HOST", process.env.DB_HOST);
-    // 쿼리 파라미터에서 id와 pw를 가져옴
-    const { id, pw } = req.query;
-    // id 또는 pw가 존재하지 않을 경우 처리
+     const { id, pw } = req.query;
     if (!id || !pw) {
       return res.status(400).json({ message: "ID와 비밀번호를 모두 입력해주세요." });
     }
     // SQL 쿼리 실행
     const query = `SELECT id, pw FROM login WHERE id = ? AND pw = ?`;
     const result = await sql.executeQuery(query, [id, pw]);
-    // console.log("로그인", result);
-    // 로그인 성공 여부 확인
     if (result.length > 0) {
       res.json(true); // 로그인 성공 시 'true' 반환
     } else {
