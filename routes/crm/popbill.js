@@ -4,8 +4,8 @@ import * as popbillController from "../../controllers/popbill/popbillController.
 
 const router = express.Router();
 
-router.get("/kakao/Templatelist", popbillController.Templatelist);
-router.get("/kakao/TemplateContent", popbillController.TemplateContent);
+// router.get("/kakao/Templatelist", popbillController.Templatelist);
+// router.get("/kakao/TemplateContent", popbillController.TemplateContent);
 // router.post("/kakao/MessageSend", popbillController.MessageSend);
 // router.get("/kakao/getSendMessages", popbillController.getSendMessages);
 // router.get("/kakao/SendMessages", popbillController.getSendMessages);
