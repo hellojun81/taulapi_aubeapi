@@ -67,7 +67,7 @@ app.use("/api/schedules", scheduleRoutes);
 // app.use("/api/estimates", estimatesRoutes);
 // app.use("/api/popbill", popbillRoutes);
 
-autoschedules.startSchedules();
+// autoschedules.startSchedules();
 httpServer.listen(port, () => {
   console.log(`Server started on port ${port}`);
 });
