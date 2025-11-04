@@ -62,7 +62,7 @@ app.get("/login", async (req, res) => {
 app.use("/api/customers", customersRoutes);
 app.use("/api/filmmakers", filmmakersRoutes);
 app.use("/api/schedules", scheduleRoutes);
-app.use("/api/setup", setupRoutes);
+// app.use("/api/setup", setupRoutes);
 // app.use("/api/sms", smsRoutes);
 // app.use("/api/estimates", estimatesRoutes);
 // app.use("/api/popbill", popbillRoutes);
