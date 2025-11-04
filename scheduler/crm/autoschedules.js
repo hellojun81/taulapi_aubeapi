@@ -2,6 +2,9 @@ import cron from "node-cron";
 import mysql from "mysql2/promise";
 import filmmakersContoller from "../../controllers/crm/filmmakers.js";
 import * as popbillBank from "../../services/popbill/popbillBank.js";
+import dayjs from "dayjs";
+
+let running = false;
 
 // // MySQL 데이터베이스 연결 설정
 
@@ -90,15 +93,21 @@ const startSchedules = async () => {
   // cron.schedule("* * * * *", latestTransactions);
   // cron.schedule("*/10 * * * *", latestTransactions);
   let running = false;
-cron.schedule("* * * * *", async () => {
+cron.schedule("0 */5 * * * *", async () => {
   if (running) return;
   running = true;
+  const now = dayjs().format("YYYY-MM-DD HH:mm:ss");
+  console.log(`[${now}] 🔄 latestTransactions 실행 시작`);
+
   try {
     await latestTransactions();
+    console.log(`[${now}] ✅ latestTransactions 완료`);
+  } catch (err) {
+    console.error(`[${now}] ❌ latestTransactions 실패:`, err.message);
   } finally {
     running = false;
   }
-});
+}, { timezone: "Asia/Seoul" });
 };
 
 export default { startSchedules };

@@ -63,9 +63,7 @@ const getScheduleByCoustomerId = async (id) => {
 };
 const getScheduleById = async (id) => {
   const query = `SELECT ${selectqueryinit} WHERE A.id = ?`;
-  console.log("query", query);
   const result = await sql.executeQuery(query, id);
-  console.log("getScheduleById", result);
   return result[0];
 };
 
@@ -89,7 +87,6 @@ const getcsByDate = async (startDate, endDate, customerName, csKind) => {
   if (customerName == undefined) {
     customerName = "";
   }
-  // console.log("getcsByDate", typeof parseInt(csKind));
   let query;
   if (csKind == 0) {
     query = `SELECT ${selectqueryinit} WHERE A.created_at >= '${startDate} 00:00:00' AND A.created_at <= '${endDate} 23:59:59' and ( B.customerName like '%${customerName}%' or  A.etc like '%${customerName}%' )`;
@@ -103,7 +100,6 @@ const getcsByDate = async (startDate, endDate, customerName, csKind) => {
 };
 
 const getScheduleByMonth = async (Month, sort) => {
-  // console.log({ "getScheduleByMonth Month": Month, sort: sort });
   const year = Month.substring(0, 4);
   const month = Month.substring(5, 7); // 9월이지만 0부터 시작하므로 8
   const date = new Date(year, month);
@@ -252,7 +248,7 @@ ORDER BY
            ${Sortby}`;
   }
 
-  console.log("querytest", query);
+  // console.log("querytest", query);
   let result = await sql.executeQuery(query);
   result = result.map((row) => ({
     ...row,

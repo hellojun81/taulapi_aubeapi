@@ -6,11 +6,11 @@ import dayjs from "dayjs";
 const getAllSchedules = async (req, res) => {
   try {
     const { csKindIds } = req.query;
-    console.log("getAllSchedules csKindIds", csKindIds);
+    // console.log("getAllSchedules csKindIds", csKindIds);
     const schedules = await schedulesService.getAllSchedules(req, res);
     res.json(schedules);
   } catch (error) {
-    console.error("Error fetching schedules:", error);
+    // console.error("Error fetching schedules:", error);
     res.status(500).json({ error: "Failed to fetch schedules" });
   }
 };
@@ -32,7 +32,7 @@ const getScheduleById = async (req, res) => {
         break;
       case "schedules":
         if (SearchMonth) {
-          console.log("SearchMonth", SearchMonth);
+          // console.log("SearchMonth", SearchMonth);
           result = await schedulesService.getScheduleByMonth(SearchMonth, sort);
         } else {
           result = await schedulesService.getScheduleById(SearchMonth);
@@ -54,7 +54,7 @@ const getScheduleById = async (req, res) => {
       res.status(404).json({ error: "Schedule not found" });
     }
   } catch (error) {
-    console.error("Error fetching schedule:", error);
+    // console.error("Error fetching schedule:", error);
     res.status(500).json({ error: "Failed to fetch schedule" });
   }
 };
@@ -78,7 +78,7 @@ const createSchedule = async (req, res) => {
       res.status(201).json({ message: createdSchedule });
     }
   } catch (error) {
-    console.error("Error creating schedule:", error);
+    // console.error("Error creating schedule:", error);
     res.status(500).json({ error: "Failed to create schedule" });
   }
 };
@@ -108,7 +108,7 @@ const updateSchedule = async (req, res) => {
     const { id } = req.params;
     const updatedSchedule = req.body;
     const { update_ID, SearchMonth } = req.query;
-    console.log({ 스케쥴수정: req.params, id: id, update_ID: update_ID, SearchMonth: SearchMonth, updatedSchedule: updatedSchedule });
+    // console.log({ 스케쥴수정: req.params, id: id, update_ID: update_ID, SearchMonth: SearchMonth, updatedSchedule: updatedSchedule });
     let result;
 
     if (id === "getCsKind") {
@@ -117,7 +117,7 @@ const updateSchedule = async (req, res) => {
       } else {
         result = await schedulesService.Inint_csKind();
       }
-      console.log("updateSchedule for getScheduleByMonth");
+      // console.log("updateSchedule for getScheduleByMonth");
       result = await schedulesService.getScheduleByMonth(SearchMonth);
     } else {
       result = await schedulesService.updateSchedule(id, updatedSchedule);
@@ -129,7 +129,7 @@ const updateSchedule = async (req, res) => {
       res.status(404).json({ error: "Schedule not found" });
     }
   } catch (error) {
-    console.error("Error updating schedule:", error);
+    // console.error("Error updating schedule:", error);
     res.status(500).json({ error: "Failed to update schedule" });
   }
 };
@@ -145,7 +145,7 @@ const deleteSchedule = async (req, res) => {
       res.status(404).json({ error: "Schedule not found" });
     }
   } catch (error) {
-    console.error("Error deleting schedule:", error);
+    // console.error("Error deleting schedule:", error);
     res.status(500).json({ error: "Failed to delete schedule" });
   }
 };
