@@ -4,11 +4,11 @@ import cors from "cors";
 import dotenv from "dotenv";
 import http from "http";
 import sql from "./lib/crm/sql.js";
-import customersRoutes from "./routes/crm/customers.js";
-import scheduleRoutes from "./routes/crm/schedules.js";
-import setupRoutes from "./routes/crm/setup.js";
-import filmmakersRoutes from "./routes/crm/filmmakers.js";
-import autoschedules from "./scheduler/crm/autoschedules.js";
+// import customersRoutes from "./routes/crm/customers.js";
+// import scheduleRoutes from "./routes/crm/schedules.js";
+// import setupRoutes from "./routes/crm/setup.js";
+// import filmmakersRoutes from "./routes/crm/filmmakers.js";
+// import autoschedules from "./scheduler/crm/autoschedules.js";
 // import bankRoutes from "./routes/crm/bank.js";
 // import smsRoutes from "./routes/crm/smsTemplates.js";
 // import estimatesRoutes from "./routes/crm/estimates.js";
@@ -59,9 +59,9 @@ app.get("/login", async (req, res) => {
   }
 });
 
-app.use("/api/customers", customersRoutes);
-app.use("/api/filmmakers", filmmakersRoutes);
-app.use("/api/schedules", scheduleRoutes);
+// app.use("/api/customers", customersRoutes);
+// app.use("/api/filmmakers", filmmakersRoutes);
+// app.use("/api/schedules", scheduleRoutes);
 // app.use("/api/setup", setupRoutes);
 // app.use("/api/sms", smsRoutes);
 // app.use("/api/estimates", estimatesRoutes);
