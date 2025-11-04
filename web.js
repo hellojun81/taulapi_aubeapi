@@ -34,7 +34,7 @@ app.get("/", (req, res) => {
   res.json("welcome aubeCrm ^^");
 });
 
-app.use(AdRoutes); // ✅ 여기서 경로 붙이기
+// app.use(AdRoutes); // ✅ 여기서 경로 붙이기
 app.get("/login", async (req, res) => {
     // res.setHeader('Access-Control-Allow-Origin', 'http://aubestudios.cafe24.com');
   try {
