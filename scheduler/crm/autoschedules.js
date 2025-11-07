@@ -1,7 +1,7 @@
 import cron from "node-cron";
 import mysql from "mysql2/promise";
 import filmmakersContoller from "../../controllers/crm/filmmakers.js";
-import * as popbillBank from "../../services/popbill/popbillBank.js";
+// import * as popbillBank from "../../services/popbill/popbillBank.js";
 import dayjs from "dayjs";
 
 let running = false;
@@ -19,16 +19,16 @@ const pool = mysql.createPool({
 
 
 //카페 답변받고 주석 풀어야함
-export const latestTransactions = async () => {
-  const timerLabel = "latestTransactions 실행 시간";
-  console.time(timerLabel);
-  try {
-    const result = await popbillBank.AutolatestTransactions();
-    console.log("은행거래내역 업데이트 완료");
-  } catch (error) {
-    console.error("latestTransactions 처리 중 오류:", error.message);
-  }
-};
+// export const latestTransactions = async () => {
+//   const timerLabel = "latestTransactions 실행 시간";
+//   console.time(timerLabel);
+//   try {
+//     const result = await popbillBank.AutolatestTransactions();
+//     console.log("은행거래내역 업데이트 완료");
+//   } catch (error) {
+//     console.error("latestTransactions 처리 중 오류:", error.message);
+//   }
+// };
 
 //////0327 10분간격으로 실행하다록 설정
 const executeScheduledTasks = async () => {
