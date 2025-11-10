@@ -9,7 +9,7 @@ import scheduleRoutes from "./routes/crm/schedules.js";
 import setupRoutes from "./routes/crm/setup.js";
 import filmmakersRoutes from "./routes/crm/filmmakers.js";
 import autoschedules from "./scheduler/crm/autoschedules.js";
-import popbillRoutes from "./routes/crm/popbill.js";
+// import popbillRoutes from "./routes/crm/popbill.js";
   // import bankRoutes from "./routes/crm/bank.js";
 // import smsRoutes from "./routes/crm/smsTemplates.js";
 // import estimatesRoutes from "./routes/crm/estimates.js";
@@ -64,7 +64,7 @@ app.use("/api/customers", customersRoutes);
 app.use("/api/schedules", scheduleRoutes);
 app.use("/api/setup", setupRoutes);
 app.use("/api/filmmakers", filmmakersRoutes);
-app.use("/api/popbill", popbillRoutes);
+// app.use("/api/popbill", popbillRoutes);
 // app.use("/api/sms", smsRoutes);
 // app.use("/api/estimates", estimatesRoutes);
 
