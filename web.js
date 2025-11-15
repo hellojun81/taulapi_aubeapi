@@ -12,7 +12,7 @@ import autoschedules from "./scheduler/crm/autoschedules.js";
 import popbillRoutes from "./routes/crm/popbill.js";
   // import bankRoutes from "./routes/crm/bank.js";
 import smsRoutes from "./routes/crm/smsTemplates.js";
-import estimatesRoutes from "./routes/crm/estimates.js";
+// import estimatesRoutes from "./routes/crm/estimates.js";
 // import AdRoutes from "./routes/ad-api/AdRoutes.js";
 import "./scheduler/ad-api/dailyCollector.js";
 
