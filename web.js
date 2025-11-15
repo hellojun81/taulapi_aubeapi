@@ -67,7 +67,7 @@ app.use("/api/setup", setupRoutes);
 app.use("/api/filmmakers", filmmakersRoutes);
 app.use("/api/popbill", popbillRoutes);
 app.use("/api/sms", smsRoutes);
-app.use("/api/estimates", estimatesRoutes);
+// app.use("/api/estimates", estimatesRoutes);
 
 
 autoschedules.startSchedules();
