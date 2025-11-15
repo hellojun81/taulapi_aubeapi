@@ -10,6 +10,7 @@ export const latestTransactions = async (req, res) => {
   const endDate = dayjs().format("YYYYMMDD");
   try {
     JobID = await getJobID(startDate, endDate);
+    console.log(JobID)
   } catch (error) {
     throw new Error("은행 계좌 거래 내역 요청 JobID 발급 실패: " + error.message);
   }

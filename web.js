@@ -10,13 +10,14 @@ import setupRoutes from "./routes/crm/setup.js";
 import filmmakersRoutes from "./routes/crm/filmmakers.js";
 import autoschedules from "./scheduler/crm/autoschedules.js";
 import popbillRoutes from "./routes/crm/popbill.js";
-  import bankRoutes from "./routes/crm/bank.js";
+  // import bankRoutes from "./routes/crm/bank.js";
 import smsRoutes from "./routes/crm/smsTemplates.js";
 import estimatesRoutes from "./routes/crm/estimates.js";
 import AdRoutes from "./routes/ad-api/AdRoutes.js";
 import "./scheduler/ad-api/dailyCollector.js";
 
-dotenv.config();
+dotenv.config({ path: '.env' });  // 현재 폴더의 .env
+
 const app = express();
 const httpServer = http.createServer(app);
 const port = process.env.PORT || 8001;
