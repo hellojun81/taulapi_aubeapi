@@ -33,7 +33,7 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.13",
     "path": "^0.12.7",
-    "popbill": "^1.62.0",
+    "popbill": "https://registry.npmjs.org/popbill/-/popbill-1.62.0.tgz",
     "qs": "^6.14.0",
     "request": "^2.88.2",
     "set-cookie-parser": "^2.7.1",

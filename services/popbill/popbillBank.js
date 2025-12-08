@@ -9,6 +9,7 @@ export const latestTransactions = async (req, res) => {
   const startDate = dayjs().subtract(30, "day").format("YYYYMMDD");
   const endDate = dayjs().format("YYYYMMDD");
   try {
+    console.log({startDate:startDate,endDate:endDate})
     JobID = await getJobID(startDate, endDate);
     console.log(JobID)
   } catch (error) {

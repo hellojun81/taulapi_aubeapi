@@ -1,4 +1,12 @@
 //카페24 브랜치 잘확인해야함 카페는  git push --set-upstream origin master
+//  zip -r taulapi.zip . -x "node_modules/*" ".git/*" ".DS_Store"
+// scp ~/Desktop/coding/taul/taulapi_aubeapi/taulapi.zip root@114.202.247.178:/var/www
+// unzip -o taulapi.zip -d taulapi
+// cd taulapi
+// pm2 restart taulapi
+
+
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -32,7 +40,7 @@ app.use(
 
 app.use(express.json());
 app.get("/", (req, res) => {
-  res.json("welcome aubeCrm ^^");
+  res.json("welcome taulapi ^^");
 });
 
 // app.use(AdRoutes); // ✅ 여기서 경로 붙이기

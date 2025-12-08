@@ -9,7 +9,7 @@ import dotenv from "dotenv"; // 환경 변수 로드용 (필요하다면)
 popbill.config({
   LinkID: process.env.POPBILL_LINK_ID,
   SecretKey: process.env.POPBILL_SECRET_KEY,
-  IsTest: true,
+  IsTest: false,
   IPRestrictOnOff: true,
   UseStaticIP: false,
   UseLocalTimeYN: true,
