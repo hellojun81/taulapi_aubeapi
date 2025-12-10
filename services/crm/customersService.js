@@ -59,9 +59,30 @@ const addCustomer = async (customer) => {
 
 // 고객 수정
 const updateCustomer = async (id, customer) => {
-  customer.inboundDate = dayjs(customer.inboundDate).format("YYYY-MM-DD");
+  console.log("updateCustomer2", { id, customer });
+
+  const keys = Object.keys(customer || {});
+
+  // 1) phone 단독 업데이트 케이스 (inline 편집)
+  if (keys.length === 1 && keys[0] === "phone") {
+    const query = "UPDATE Customers SET phone = ? WHERE id = ?";
+    const params = [customer.phone, id];
+
+    console.log("updateCustomer: phone only SQL", query, params);
+
+    const result = await sql.executeQuery(query, params);
+    return result.affectedRows > 0;
+  }
+
+  // 2) 그 외 → full update (CustomerDialog 등에서 전체 객체 넘어오는 경우)
+  // inboundDate가 있을 때만 포맷팅
+  if (customer.inboundDate) {
+    customer.inboundDate = dayjs(customer.inboundDate).format("YYYY-MM-DD");
+  }
+
   const query =
     "UPDATE Customers SET customerName = ?, contactPerson = ?, position = ?, phone = ?, email = ?, leadSource = ?, inboundDate = ?, businessNumber = ?, representative = ?, location = ?, notes = ? WHERE id = ?";
+
   const params = [
     customer.customerName,
     customer.contactPerson,
@@ -76,6 +97,9 @@ const updateCustomer = async (id, customer) => {
     customer.notes,
     id,
   ];
+
+  console.log("updateCustomer: full SQL", query, params);
+
   const result = await sql.executeQuery(query, params);
   return result.affectedRows > 0;
 };

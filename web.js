@@ -1,5 +1,6 @@
-//카페24 브랜치 잘확인해야함 카페는  git push --set-upstream origin master
 //  zip -r taulapi.zip . -x "node_modules/*" ".git/*" ".DS_Store"
+//ssh root@114.202.247.178
+
 // scp ~/Desktop/coding/taul/taulapi_aubeapi/taulapi.zip root@114.202.247.178:/var/www
 // unzip -o taulapi.zip -d taulapi
 // cd taulapi

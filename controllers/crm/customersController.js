@@ -36,7 +36,7 @@ const updateCustomer = async (req, res) => {
   try {
     const { id } = req.params;
     const customer = req.body;
-    // console.log({ id: id, customer: customer });
+    console.log(updateCustomer,{ id: id, customer: customer });
     await customersService.updateCustomer(id, customer);
     res.status(200).json({ message: "수정 완료" });
   } catch (error) {
