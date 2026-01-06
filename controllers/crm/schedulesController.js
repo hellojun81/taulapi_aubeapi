@@ -5,25 +5,17 @@ import dayjs from "dayjs";
 // 모든 스케줄 가져오기
 const getAllSchedules = async (req, res) => {
   try {
-
-    console.log({ 'req.query': req.query })
-
     const { SearchMonth, csKindIds, sort } = req.query;
-    const schedules =await schedulesService.getScheduleByMonth(SearchMonth, sort);
-    // const schedules = await schedulesService.getAllSchedules(req, res);
+        console.log({ 'req.query': req.query,SearchMonth:SearchMonth,sort:sort })
 
-  //  if (SearchMonth) {
-  //         // console.log("SearchMonth", SearchMonth);
-  //         result = await schedulesService.getScheduleByMonth(SearchMonth, sort);
-  //       } else {
-  //         result = await schedulesService.getScheduleById(SearchMonth);
-  //       }
-
-
-
+    let schedules;
+   if(sort==="START"){
+     schedules = await schedulesService.getAllSchedules(req, res);
+    }else{
+        schedules = await schedulesService.getScheduleByMonth(SearchMonth, sort);
+    }
     res.json(schedules);
   } catch (error) {
-    // console.error("Error fetching schedules:", error);
     res.status(500).json({ error: "Failed to fetch schedules getAllSchedules" });
   }
 };
