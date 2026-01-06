@@ -113,7 +113,7 @@ export const saveTransactions = async (transactions) => {
       item.regDT.substring(12, 14)
     ),
   ]);
-
+  
   const query = `
         INSERT INTO bank_transactions (
             tid, trserial, accountID, balance, accIn, accOut, 

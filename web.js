@@ -1,12 +1,11 @@
-//  zip -r taulapi.zip . -x "node_modules/*" ".git/*" ".DS_Store"
 //ssh root@114.202.247.178
+// cd /var/www/taulapi_aubeapi
+// git pull
+// pm2 restart web
 
+//  zip -r taulapi.zip . -x "node_modules/*" ".git/*" ".DS_Store"
 // scp ~/Desktop/coding/taul/taulapi_aubeapi/taulapi.zip root@114.202.247.178:/var/www
 // unzip -o taulapi.zip -d taulapi
-// cd taulapi
-// pm2 restart taulapi
-
-
 
 import express from "express";
 import cors from "cors";
