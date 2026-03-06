@@ -6,7 +6,7 @@ import { createSuccessCallback, createErrorCallback, easyFinBankService, CorpNum
 
 export const latestTransactions = async (req, res) => {
   let JobID;
-  const startDate = dayjs().subtract(30, "day").format("YYYYMMDD");
+  const startDate = dayjs().subtract(27, "day").format("YYYYMMDD");
   const endDate = dayjs().format("YYYYMMDD");
   try {
     console.log({startDate:startDate,endDate:endDate})
@@ -198,6 +198,7 @@ export const get_DB_BankTransactions = async (startDate, endDate, tradeType, des
 
 const getJobID = async (startDate, endDate) => {
   const BankCode = "0003";
+  console.log('getJobID',startDate,endDate)
   return new Promise((resolve, reject) => {
     easyFinBankService.requestJob(
       CorpNum,
