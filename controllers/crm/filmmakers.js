@@ -6,17 +6,34 @@ import { parseDocument } from "htmlparser2";
 import { selectOne } from "css-select";
 
 const getInfo = async (cookie) => {
+  console.log('getInfo cookie',cookie)
   try {
-    const options = {
+      const options = {
       method: "GET",
       url: "https://www.filmmakers.co.kr/locationBank/21206554/edit",
       headers: {
         Cookie: cookie,
+        "user-agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
+        accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        referer: "https://www.filmmakers.co.kr/",
       },
+      validateStatus: () => true,
+      timeout: 20000,
     };
-    // console.log({ "getInfo cookie": cookie, options: options });
+    // const options = {
+    //   method: "GET",
+    //   url: "https://www.filmmakers.co.kr/locationBank/21206554/edit",
+    //   headers: {
+    //     Cookie: cookie,
+    //   },
+    // };
+    // console.log("getInfo options", options );
     const response = await axios(options);
+      // console.log("getInfo response", response);
     const html = response.data;
+    // console.log({ "getInfo html": html });
     const document = parseDocument(html);
 
     const metaContentValue = selectOne('input[type="hidden"][name="content"]', document);
@@ -40,7 +57,7 @@ const getLogin = async () => {
       ruleset: "@login",
       act: "procMemberLogin",
       success_return_url: "/",
-      xe_validator_id: "widgets/login_info/skins/default/login_form/1",
+      xe_validator_id: "modules/member/skins",
       user_id: "taulcontact",
       password: "h23585858!",
     });
@@ -66,7 +83,6 @@ const getLogin = async () => {
     const html = response.data;
     const setCookies = response.headers["set-cookie"];
 
-    // 쿠키 값을 저장할 객체 초기화
     const cookies = {
       PHPSESSID: null,
       rx_login_status: null,
@@ -81,9 +97,8 @@ const getLogin = async () => {
       }
     });
 
-    // console.log('PHPSESSID:', cookies.PHPSESSID);
-    // console.log('rx_login_status:', cookies.rx_login_status);
     const getcookie = "PHPSESSID=" + cookies.PHPSESSID + "; rx_login_status=" + cookies.rx_login_status;
+    console.log("getLogin cookie",getcookie)
     return getcookie;
   } catch (error) {
     console.error("Login error:", error);
@@ -125,10 +140,13 @@ const postEdit = async () => {
 
   const getCookie = await getLogin();
   const CrsfToken = await getCrsfToken(getCookie);
+  // console.log("getInfo:시작" ,getCookie)
   const getInfoVaule = await getInfo(getCookie);
+  console.log("postEdit",getInfoVaule.rx_login_status)
+  // return
   const ContentValue = getInfoVaule.ContentValue;
   const title = getInfoVaule.title;
-
+ 
   const formData = {
     _filter: "insert",
     mid: "locationBank",
