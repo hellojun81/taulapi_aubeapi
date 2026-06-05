@@ -1,4 +1,5 @@
-//ssh root@114.202.247.178
+//ssh root@114.202.247.178.  Pw:82
+
 // cd /var/www/taulapi_aubeapi
 // git pull
 // pm2 restart web
