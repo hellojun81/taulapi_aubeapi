@@ -2,9 +2,9 @@ import axios from "axios";
 import querystring from "querystring";
 import { parseDocument } from "htmlparser2";
 import { selectOne } from "css-select";
-import qs from 'querystring';
-import { load } from 'cheerio';
-import { chromium } from 'playwright';
+// import qs from 'querystring';
+// import { load } from 'cheerio';
+// import { chromium } from 'playwright';
 
 const USER_ID = process.env.FILMMAKERS_ID || "taulcontact";
 const PASSWORD = process.env.FILMMAKERS_PASSWORD || "wpdlznf@123";
