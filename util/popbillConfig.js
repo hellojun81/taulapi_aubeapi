@@ -6,10 +6,12 @@ import dotenv from "dotenv"; // 환경 변수 로드용 (필요하다면)
 // 환경 변수가 이미 로드되었다고 가정
 // dotenv.config();
 
+const isTest = ["true", "1", "yes"].includes(String(process.env.POPBILL_TEST || "true").toLowerCase());
+
 popbill.config({
   LinkID: process.env.POPBILL_LINK_ID,
   SecretKey: process.env.POPBILL_SECRET_KEY,
-  IsTest: false,
+  IsTest: isTest,
   IPRestrictOnOff: true,
   UseStaticIP: false,
   UseLocalTimeYN: true,

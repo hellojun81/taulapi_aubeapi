@@ -25,8 +25,7 @@ export const registTaxIssue = async (req, res, next) => {
     const totalAmount = toStrNum(src.totalAmount);
 
     // 공급자
-    // CORP_NUM 변수가 정의되어 있다고 가정
-    const invoicerCorpNum = onlyDigits(src.invoicerCorpNum || CORP_NUM);
+    const invoicerCorpNum = onlyDigits(src.invoicerCorpNum || CorpNum);
     const invoicerMgtKey = src.invoicerMgtKey || makeMgtKey();
     const invoicerCorpName = src.invoicerCorpName || "";
     const invoicerCEOName = src.invoicerCEOName || "";
@@ -62,11 +61,23 @@ export const registTaxIssue = async (req, res, next) => {
       remark: d.remark || "",
     }));
 
+    if (!/^\d{8}$/.test(writeDate)) {
+      return res.status(400).json({ message: "작성일자(writeDate)는 YYYYMMDD 형식이어야 합니다." });
+    }
+    if (invoicerCorpNum.length !== 10) {
+      return res.status(400).json({ message: "공급자 등록번호(invoicerCorpNum)는 10자리여야 합니다." });
+    }
     if (!detailList.length) {
       return res.status(400).json({ message: "품목(detailList)은 최소 1개 이상이어야 합니다." });
     }
-    if (!invoiceeCorpNum) {
-      return res.status(400).json({ message: "공급받는자 등록번호(invoiceeCorpNum)는 필수입니다." });
+    if (invoiceeCorpNum.length !== 10) {
+      return res.status(400).json({ message: "공급받는자 등록번호(invoiceeCorpNum)는 10자리여야 합니다." });
+    }
+    if (detailList.some((item) => !item.itemName || Number(item.supplyCost) <= 0)) {
+      return res.status(400).json({ message: "각 품목의 품목명과 0보다 큰 공급가액은 필수입니다." });
+    }
+    if (Number(supplyCostTotal) <= 0 || Number(totalAmount) <= 0) {
+      return res.status(400).json({ message: "공급가액과 합계금액은 0보다 커야 합니다." });
     }
 
     // Popbill 요청 객체
