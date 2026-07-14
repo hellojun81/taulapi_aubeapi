@@ -65,6 +65,18 @@ const getScheduleById = async (req, res) => {
   }
 };
 
+const getKoreanHolidays = async (req, res) => {
+  try {
+    const holidays = await schedulesService.getKoreanHolidays(req.query.year);
+    res.json(holidays);
+  } catch (error) {
+    const statusCode = error.statusCode || 502;
+    res.status(statusCode).json({
+      error: statusCode === 400 ? error.message : "공휴일 정보를 가져오지 못했습니다.",
+    });
+  }
+};
+
 // 스케줄 생성
 const createSchedule = async (req, res) => {
   try {
@@ -162,4 +174,5 @@ export default {
   createSchedule,
   updateSchedule,
   deleteSchedule,
+  getKoreanHolidays,
 };

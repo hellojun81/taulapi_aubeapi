@@ -7,11 +7,12 @@ import dotenv from "dotenv"; // 환경 변수 로드용 (필요하다면)
 // dotenv.config();
 
 const isTest = ["true", "1", "yes"].includes(String(process.env.POPBILL_TEST || "true").toLowerCase());
+const isBankTest = ["true", "1", "yes"].includes(String(process.env.POPBILL_BANK_TEST ?? isTest).toLowerCase());
 
-popbill.config({
+const createPopbillConfig = (testMode) => ({
   LinkID: process.env.POPBILL_LINK_ID,
   SecretKey: process.env.POPBILL_SECRET_KEY,
-  IsTest: isTest,
+  IsTest: testMode,
   IPRestrictOnOff: true,
   UseStaticIP: false,
   UseLocalTimeYN: true,
@@ -21,8 +22,12 @@ popbill.config({
 });
 
 // 팝빌 서비스 객체들을 초기화하고 export 합니다.
+// 은행은 운영 계좌를 조회하면서 세금계산서 등은 안전하게 테스트 모드를 유지할 수 있습니다.
+popbill.config(createPopbillConfig(isBankTest));
+export const easyFinBankService = popbill.EasyFinBankService();
+
+popbill.config(createPopbillConfig(isTest));
 export const kakaoService = popbill.KakaoService();
-export const easyFinBankService = popbill.EasyFinBankService(); // EasyFinBank도 사용한다면 추가
 export const bizInfoCheckService = popbill.BizInfoCheckService();
 export const taxinvoiceService = popbill.TaxinvoiceService();
 // 자주 사용되는 상수도 여기서 export 합니다.

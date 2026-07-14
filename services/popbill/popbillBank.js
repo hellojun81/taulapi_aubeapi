@@ -4,78 +4,143 @@ import sql from "../../lib/crm/sql.js";
 
 import { createSuccessCallback, createErrorCallback, easyFinBankService, CorpNum, UserID, BANK_ACCOUNT } from "../../util/popbillConfig.js";
 
-export const latestTransactions = async (req, res) => {
-  let JobID;
-  const startDate = dayjs().subtract(27, "day").format("YYYYMMDD");
-  const endDate = dayjs().format("YYYYMMDD");
-  try {
-    console.log({startDate:startDate,endDate:endDate})
-    JobID = await getJobID(startDate, endDate);
-    console.log(JobID)
-  } catch (error) {
-    throw new Error("은행 계좌 거래 내역 요청 JobID 발급 실패: " + error.message);
-  }
+export const listBankAccounts = async () =>
+  new Promise((resolve, reject) => {
+    easyFinBankService.listBankAccount(
+      CorpNum,
+      UserID,
+      (accounts) => resolve(accounts || []),
+      (error) => reject(new Error(error?.message || "등록 계좌 목록 조회 실패"))
+    );
+  });
+
+const searchAccountTransactions = async (account, startDate, endDate) => {
+  const jobID = await getJobID(startDate, endDate, account.bankCode, account.accountNumber);
+  await waitForJobCompletion(jobID);
   const searchResult = await new Promise((resolve, reject) => {
     easyFinBankService.search(
       CorpNum,
-      JobID,
+      jobID,
       "A",
       "",
       1,
       1000,
       "A",
       UserID,
-      (result) => {
-        resolve(result);
-      },
-       (error) => {
-        const msg =
-          (error && error.message) ||
-          (typeof error === "string" ? error : "") ||
-          "거래내역 조회 중 오류 발생";
-        reject(new Error(msg));
-      }
+      resolve,
+      (error) => reject(new Error(error?.message || "거래내역 조회 중 오류 발생"))
     );
   });
-  const saveData = await saveTransactions(searchResult.list);
-  res.json(`${saveData.affectedRows}건 업데이트 완료`);
+  await saveAccountRegistry(searchResult.list, account);
+  const saved = await saveTransactions(searchResult.list);
+  return {
+    accountName: account.accountName || "계좌",
+    accountNumber: `****${String(account.accountNumber).slice(-4)}`,
+    collectedCount: Number(searchResult?.totalCount || searchResult?.TotalCount || 0),
+    updatedCount: Number(saved?.affectedRows || 0),
+  };
+};
+
+const ensureBankAccountRegistry = async () => {
+  await sql.executeQuery(`
+    CREATE TABLE IF NOT EXISTS bank_account_registry (
+      accountID VARCHAR(64) PRIMARY KEY,
+      accountName VARCHAR(100) NOT NULL,
+      bankCode VARCHAR(10),
+      maskedAccountNumber VARCHAR(20),
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )
+  `);
+};
+
+const saveAccountRegistry = async (transactions = [], account) => {
+  const accountIDs = [...new Set(transactions.map((item) => item.accountID).filter(Boolean))];
+  if (!accountIDs.length) return;
+  await ensureBankAccountRegistry();
+
+  for (const accountID of accountIDs) {
+    await sql.executeQuery(
+      `INSERT INTO bank_account_registry (accountID, accountName, bankCode, maskedAccountNumber)
+       VALUES (?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         accountName = VALUES(accountName),
+         bankCode = VALUES(bankCode),
+         maskedAccountNumber = VALUES(maskedAccountNumber)`,
+      [accountID, account.accountName || "계좌", account.bankCode, `****${String(account.accountNumber).slice(-4)}`]
+    );
+  }
+};
+
+const getJobState = async (jobID) =>
+  new Promise((resolve, reject) => {
+    easyFinBankService.getJobState(
+      CorpNum,
+      jobID,
+      UserID,
+      resolve,
+      (error) => reject(new Error(error?.message || "수집 상태 확인 실패"))
+    );
+  });
+
+const waitForJobCompletion = async (jobID, maxAttempts = 30, intervalMs = 1000) => {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const state = await getJobState(jobID);
+    if (String(state.jobState) === "3") {
+      if (Number(state.errorCode) === 1) return state;
+      throw new Error(state.errorReason || "계좌 거래내역 수집에 실패했습니다.");
+    }
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+  throw new Error("계좌 거래내역 수집 대기 시간이 초과되었습니다.");
+};
+
+const collectAllBankAccounts = async (startDate, endDate) => {
+  let accounts = await listBankAccounts();
+  if (!accounts.length && BANK_ACCOUNT) {
+    accounts = [{ bankCode: "0003", accountNumber: BANK_ACCOUNT, accountName: "기본계좌" }];
+  }
+
+  return Promise.all(
+    accounts.map(async (account) => {
+      try {
+        return { ok: true, ...(await searchAccountTransactions(account, startDate, endDate)) };
+      } catch (error) {
+        return {
+          ok: false,
+          accountName: account.accountName || "계좌",
+          accountNumber: `****${String(account.accountNumber).slice(-4)}`,
+          message: error.message,
+        };
+      }
+    })
+  );
+};
+
+export const latestTransactions = async (req, res) => {
+  const startDate = dayjs().subtract(27, "day").format("YYYYMMDD");
+  const endDate = dayjs().format("YYYYMMDD");
+  try {
+    const accounts = await collectAllBankAccounts(startDate, endDate);
+    const updatedCount = accounts.reduce((sum, account) => sum + (account.updatedCount || 0), 0);
+    const hasSuccess = accounts.some((account) => account.ok);
+    return res.status(hasSuccess ? 200 : 502).json({ updatedCount, accounts });
+  } catch (error) {
+    return res.status(502).json({ message: error.message });
+  }
 };
 
 export const AutolatestTransactions = async () => {
-  let JobID;
   const startDate = dayjs().subtract(30, "day").format("YYYYMMDD");
   const endDate = dayjs().format("YYYYMMDD");
   try {
-    JobID = await getJobID(startDate, endDate);
-    const searchResult = await new Promise((resolve, reject) => {
-      // 팝빌 SDK가 success/error 콜백을 분리하여 받는다고 가정하고 처리
-      easyFinBankService.search(
-        CorpNum,
-        JobID,
-        "A",
-        "",
-        1,
-        1000,
-        "A",
-        UserID,
-        (result) => {
-          resolve(result);
-        },
-
-        (error) => {
-          reject(new Error(error.message || "거래내역 조회 중 오류 발생"));
-        }
-      );
-    });
-    const saveData = await saveTransactions(searchResult.list);
-    const totalCount = searchResult && searchResult.TotalCount ? searchResult.TotalCount : 0;
-    console.log(`✅ 은행거래내역 조회 및 업데이트 완료. 총 ${totalCount}건 조회됨.`);
+    const accounts = await collectAllBankAccounts(startDate, endDate);
+    const successCount = accounts.filter((account) => account.ok).length;
+    const updatedCount = accounts.reduce((sum, account) => sum + (account.updatedCount || 0), 0);
+    console.log(`✅ ${successCount}/${accounts.length}개 계좌, ${updatedCount}건 업데이트 완료.`);
+    return { accounts, updatedCount };
   } catch (error) {
-    if (error.message.includes("JobID 발급 실패")) {
-      console.error(`🚨 FATAL 오류: ${error.message}`);
-    } else {
-      console.error(`🚨 latestTransactions 처리 중 오류: ${error.message}`);
-    }
+    console.error(`🚨 latestTransactions 처리 중 오류: ${error.message}`);
+    return { accounts: [], updatedCount: 0, error: error.message };
   }
 };
 
@@ -146,7 +211,7 @@ const getTradeTypeFilter = (num) => {
   }
 };
 
-export const get_DB_BankTransactions = async (startDate, endDate, tradeType, description) => {
+export const get_DB_BankTransactions = async (startDate, endDate, tradeType, description, accountID) => {
   let whereClauses = [];
   let queryParams = [];
   if (startDate && endDate) {
@@ -176,6 +241,11 @@ export const get_DB_BankTransactions = async (startDate, endDate, tradeType, des
     queryParams.push(description);
     queryParams.push(description);
   }
+  if (accountID) {
+    const accountIDs = String(accountID).split(",").filter(Boolean);
+    whereClauses.push(`accountID IN (${accountIDs.map(() => "?").join(",")})`);
+    queryParams.push(...accountIDs);
+  }
   const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
   const query = `
         SELECT 
@@ -196,14 +266,38 @@ export const get_DB_BankTransactions = async (startDate, endDate, tradeType, des
   }
 };
 
-const getJobID = async (startDate, endDate) => {
-  const BankCode = "0003";
-  console.log('getJobID',startDate,endDate)
+export const getBankAccountOptions = async () => {
+  await ensureBankAccountRegistry();
+  const rows = await sql.executeQuery(`
+    SELECT DISTINCT T.accountID, R.accountName
+    FROM bank_transactions T
+    LEFT JOIN bank_account_registry R ON R.accountID = T.accountID
+    WHERE T.accountID IS NOT NULL AND T.accountID <> ''
+    ORDER BY T.accountID
+  `);
+  const legacyLabels = ["지출용계좌", "매출용계좌"];
+  const grouped = new Map();
+
+  rows.forEach((row, index) => {
+    const hasAccountName = row.accountName && !["undefined", "null"].includes(row.accountName);
+    const accountName = hasAccountName ? row.accountName : legacyLabels[index] || `계좌 ${index + 1}`;
+    const group = grouped.get(accountName) || { label: accountName, accountIDs: [] };
+    group.accountIDs.push(row.accountID);
+    grouped.set(accountName, group);
+  });
+
+  return Array.from(grouped.values()).map((group) => ({
+    ...group,
+    value: group.accountIDs.join(","),
+  }));
+};
+
+const getJobID = async (startDate, endDate, bankCode = "0003", accountNumber = BANK_ACCOUNT) => {
   return new Promise((resolve, reject) => {
     easyFinBankService.requestJob(
       CorpNum,
-      BankCode,
-      BANK_ACCOUNT,
+      bankCode,
+      accountNumber,
       startDate,
       endDate,
       function (jobID) {

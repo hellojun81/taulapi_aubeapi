@@ -19,10 +19,36 @@ export const registTaxIssue = popbillTax.registTaxIssue;
 export const latestTransactions = popbillBank.latestTransactions;
 export const singleMemoUpdate = popbillBank.singleMemoUpdate;
 
+export const listBankAccounts = async (req, res) => {
+  try {
+    const accounts = await popbillBank.listBankAccounts();
+    res.json(
+      accounts.map((account) => ({
+        bankCode: account.bankCode,
+        accountName: account.accountName,
+        maskedAccountNumber: `****${String(account.accountNumber).slice(-4)}`,
+        state: account.state,
+        contractState: account.contractState,
+        useEndDate: account.useEndDate,
+      }))
+    );
+  } catch (error) {
+    res.status(502).json({ message: error.message });
+  }
+};
+
+export const getBankAccountOptions = async (req, res) => {
+  try {
+    res.json(await popbillBank.getBankAccountOptions());
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const get_DB_BankTransactions = async (req, res) => {
   try {
-    const { startDate, endDate, tradeType, description } = req.query;
-    const result = await popbillBank.get_DB_BankTransactions(startDate, endDate, tradeType, description);
+    const { startDate, endDate, tradeType, description, accountID } = req.query;
+    const result = await popbillBank.get_DB_BankTransactions(startDate, endDate, tradeType, description, accountID);
     // console.log(result);
     res.json(result);
   } catch (error) {

@@ -10,6 +10,9 @@ router.get('/', schedulesController.getAllSchedules);
 // POST 요청: 새로운 스케줄 추가
 router.post('/', schedulesController.createSchedule);
 
+// GET 요청: 대한민국 공휴일 및 대체공휴일 가져오기
+router.get('/holidays', schedulesController.getKoreanHolidays);
+
 // GET 요청: 특정 스케줄 데이터 가져오기
 router.get('/:id', schedulesController.getScheduleById);
 

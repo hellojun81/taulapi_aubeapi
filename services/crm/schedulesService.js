@@ -1,7 +1,29 @@
 // services/schedulesService.js
 import sql from "../../lib/crm/sql.js";
 import dayjs from "dayjs";
+import axios from "axios";
 const MoneyfinishNYcolor = "#505050";
+const holidayCache = new Map();
+
+const getKoreanHolidays = async (year) => {
+  const numericYear = Number(year);
+  if (!Number.isInteger(numericYear) || numericYear < 2000 || numericYear > 2100) {
+    const error = new Error("유효한 연도를 입력해주세요.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (holidayCache.has(numericYear)) {
+    return holidayCache.get(numericYear);
+  }
+
+  const { data } = await axios.get(`https://date.nager.at/api/v3/PublicHolidays/${numericYear}/KR`, {
+    timeout: 10000,
+  });
+  const holidays = data.map(({ date, localName, name }) => ({ date, localName, name }));
+  holidayCache.set(numericYear, holidays);
+  return holidays;
+};
 
 const selectqueryinit = `A.id, B.customerName,CONCAT('[', C.title, ']', B.customerName) AS title,B.phone AS contactTel, A.created_at,A.start,A.end,A.rentPlace,A.startTime,A.endTime,A.userInt,A.estPrice
     ,A.gubun,A.etc,A.csKind,C.title as cskindTitle,C.category,
@@ -301,4 +323,5 @@ export default {
   updateCsKind,
   getcsByDate,
   Inint_csKind,
+  getKoreanHolidays,
 };
