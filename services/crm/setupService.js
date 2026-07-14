@@ -20,9 +20,19 @@ const getSetupID = async (TableName) => {
 // };
 
 const getTotalSales = async (month) => {
-  const query = `SELECT (SELECT SUM(estPrice) FROM schedules WHERE LEFT(start, 7) = '${month}' AND csKind = '2') AS TOTALSALES, (SELECT SUM(spend) FROM AdPerformance WHERE LEFT(date, 7) = '${month}') AS TOTALADCOST,
-(SELECT COUNT(*) FROM schedules WHERE csKind = '2' AND LEFT(START, 7) = '${month}') AS TOTALRENTCNT;`;
-  const result = await sql.executeQuery(query);
+  if (!/^\d{4}-\d{2}$/.test(month || "")) {
+    throw new Error("SearchMonth는 YYYY-MM 형식이어야 합니다.");
+  }
+
+  const year = month.slice(0, 4);
+  const query = `
+    SELECT
+      COALESCE((SELECT SUM(estPrice) FROM schedules WHERE LEFT(start, 7) = ? AND csKind = '2'), 0) AS TOTALSALES,
+      COALESCE((SELECT SUM(spend) FROM AdPerformance WHERE LEFT(date, 7) = ?), 0) AS TOTALADCOST,
+      (SELECT COUNT(*) FROM schedules WHERE csKind = '2' AND LEFT(start, 7) = ?) AS TOTALRENTCNT,
+      COALESCE((SELECT SUM(estPrice) FROM schedules WHERE LEFT(start, 4) = ? AND csKind = '2'), 0) AS TOTALYEARSALES;
+  `;
+  const result = await sql.executeQuery(query, [month, month, month, year]);
   // console.log('getTotalSales',result[0])
   return result[0];
 };
