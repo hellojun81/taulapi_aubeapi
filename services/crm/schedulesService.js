@@ -39,9 +39,14 @@ const selectqueryinit = `A.id, B.customerName,CONCAT('[', C.title, ']', B.custom
     INNER JOIN ADmedia D ON A.ADmedia=D.keycode`;
 
 const getAllSchedules = async (req, res) => {
-  const { csKindIds } = req.query;
-  const query = `SELECT ${selectqueryinit} where A.csKind IN (${csKindIds}) ORDER BY FIELD(C.title, '대관', '답사', '가부킹', '단순문의', '기타');`;
-  const result = await sql.executeQuery(query);
+  const requestedIds = String(req.query.csKindIds || "")
+    .split(",")
+    .map((id) => Number(id))
+    .filter((id) => Number.isInteger(id) && id > 0);
+  const csKindIds = requestedIds.length > 0 ? requestedIds : [1, 2, 3, 4, 5];
+  const placeholders = csKindIds.map(() => "?").join(",");
+  const query = `SELECT ${selectqueryinit} where A.csKind IN (${placeholders}) ORDER BY FIELD(C.title, '대관', '답사', '가부킹', '단순문의', '기타');`;
+  const result = await sql.executeQuery(query, csKindIds);
   return result;
 };
 const getCustomerID = async (CustomerName) => {
