@@ -25,14 +25,16 @@ const getTotalSales = async (month) => {
   }
 
   const year = month.slice(0, 4);
+  const previousYearMonth = `${Number(year) - 1}-${month.slice(5, 7)}`;
   const query = `
     SELECT
       COALESCE((SELECT SUM(estPrice) FROM schedules WHERE LEFT(start, 7) = ? AND csKind = '2'), 0) AS TOTALSALES,
       COALESCE((SELECT SUM(spend) FROM AdPerformance WHERE LEFT(date, 7) = ?), 0) AS TOTALADCOST,
       (SELECT COUNT(*) FROM schedules WHERE csKind = '2' AND LEFT(start, 7) = ?) AS TOTALRENTCNT,
-      COALESCE((SELECT SUM(estPrice) FROM schedules WHERE LEFT(start, 4) = ? AND csKind = '2'), 0) AS TOTALYEARSALES;
+      COALESCE((SELECT SUM(estPrice) FROM schedules WHERE LEFT(start, 4) = ? AND csKind = '2'), 0) AS TOTALYEARSALES,
+      COALESCE((SELECT SUM(estPrice) FROM schedules WHERE LEFT(start, 7) = ? AND csKind = '2'), 0) AS PREVIOUSYEARSALES;
   `;
-  const result = await sql.executeQuery(query, [month, month, month, year]);
+  const result = await sql.executeQuery(query, [month, month, month, year, previousYearMonth]);
   // console.log('getTotalSales',result[0])
   return result[0];
 };
