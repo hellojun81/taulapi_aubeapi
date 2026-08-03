@@ -1,5 +1,6 @@
 // services/schedulesService.js
 import sql from "../../lib/crm/sql.js";
+import dayjs from "dayjs";
 
 const getAllSetup = async () => {
   const query = "SELECT * FROM schedules";
@@ -35,8 +36,65 @@ const getTotalSales = async (month) => {
       COALESCE((SELECT SUM(estPrice) FROM schedules WHERE LEFT(start, 7) = ? AND csKind = '2'), 0) AS PREVIOUSYEARSALES;
   `;
   const result = await sql.executeQuery(query, [month, month, month, year, previousYearMonth]);
-  // console.log('getTotalSales',result[0])
-  return result[0];
+  const today = dayjs().startOf("day");
+  const yearEnd = today.endOf("year").startOf("day");
+
+  const collectBookedDates = (schedules, rangeStart, rangeEnd) => {
+    const dates = new Set();
+
+    schedules.forEach((schedule) => {
+      let cursor = dayjs(schedule.start).startOf("day");
+      const scheduleEnd = dayjs(schedule.end).startOf("day");
+
+      if (cursor.isBefore(rangeStart)) cursor = rangeStart;
+      const lastDate = scheduleEnd.isAfter(rangeEnd) ? rangeEnd : scheduleEnd;
+
+      while (!cursor.isAfter(lastDate)) {
+        dates.add(cursor.format("YYYY-MM-DD"));
+        cursor = cursor.add(1, "day");
+      }
+    });
+
+    return dates;
+  };
+
+  const rentalSchedules = await sql.executeQuery(
+    `SELECT start, end
+     FROM schedules
+     WHERE csKind = '2'
+       AND end >= ?
+       AND start <= ?`,
+    [today.format("YYYY-MM-DD"), yearEnd.format("YYYY-MM-DD")]
+  );
+  const bookedDates = collectBookedDates(rentalSchedules, today, yearEnd);
+
+  const selectedMonthStart = dayjs(`${month}-01`).startOf("day");
+  const selectedMonthEnd = selectedMonthStart.endOf("month").startOf("day");
+  const availableMonthStart = selectedMonthStart.isBefore(today) ? today : selectedMonthStart;
+  let monthBookedDates = new Set();
+  let availableMonthCalendarDays = 0;
+
+  if (!availableMonthStart.isAfter(selectedMonthEnd)) {
+    const monthlyRentalSchedules = await sql.executeQuery(
+      `SELECT start, end
+       FROM schedules
+       WHERE csKind = '2'
+         AND end >= ?
+         AND start <= ?`,
+      [availableMonthStart.format("YYYY-MM-DD"), selectedMonthEnd.format("YYYY-MM-DD")]
+    );
+    monthBookedDates = collectBookedDates(monthlyRentalSchedules, availableMonthStart, selectedMonthEnd);
+    availableMonthCalendarDays = selectedMonthEnd.diff(availableMonthStart, "day") + 1;
+  }
+
+  const remainingCalendarDays = yearEnd.diff(today, "day") + 1;
+  return {
+    ...result[0],
+    MONTHBOOKEDDAYCOUNT: monthBookedDates.size,
+    MONTHAVAILABLESALESDAYS: Math.max(0, availableMonthCalendarDays - monthBookedDates.size),
+    BOOKEDDAYCOUNT: bookedDates.size,
+    AVAILABLESALESDAYS: Math.max(0, remainingCalendarDays - bookedDates.size),
+  };
 };
 
 // const createSchedule = async (schedule) => {
