@@ -35,9 +35,26 @@ const getTotalSales = async (month) => {
       (SELECT COUNT(*) FROM schedules WHERE csKind = '2' AND LEFT(start, 7) = ?) AS TOTALRENTCNT,
       COALESCE((SELECT SUM(estPrice) FROM schedules WHERE LEFT(start, 4) = ? AND csKind = '2'), 0) AS TOTALYEARSALES,
       COALESCE((SELECT SUM(estPrice) FROM schedules WHERE LEFT(start, 4) = ? AND csKind = '2'), 0) AS PREVIOUSYEARTOTALSALES,
-      COALESCE((SELECT SUM(estPrice) FROM schedules WHERE LEFT(start, 7) = ? AND csKind = '2'), 0) AS PREVIOUSYEARSALES;
+      COALESCE((SELECT SUM(estPrice) FROM schedules WHERE LEFT(start, 7) = ? AND csKind = '2'), 0) AS PREVIOUSYEARSALES,
+      (SELECT COUNT(*) FROM schedules WHERE LEFT(start, 7) = ? AND csKind = '1') AS PREVIOUSYEARMONTHSIMPLEINQUIRYCOUNT,
+      (SELECT COUNT(*) FROM schedules WHERE LEFT(start, 7) = ? AND csKind = '2') AS PREVIOUSYEARMONTHRENTCOUNT,
+      (SELECT COUNT(*) FROM schedules WHERE LEFT(start, 7) = ? AND csKind = '3') AS PREVIOUSYEARMONTHVISITCOUNT,
+      (SELECT COUNT(*) FROM schedules WHERE LEFT(start, 7) = ? AND csKind = '4') AS PREVIOUSYEARMONTHTENTATIVECOUNT,
+      (SELECT COUNT(*) FROM schedules WHERE LEFT(start, 7) = ? AND csKind = '5') AS PREVIOUSYEARMONTHOTHERCOUNT;
   `;
-  const result = await sql.executeQuery(query, [month, month, month, year, previousYear, previousYearMonth]);
+  const result = await sql.executeQuery(query, [
+    month,
+    month,
+    month,
+    year,
+    previousYear,
+    previousYearMonth,
+    previousYearMonth,
+    previousYearMonth,
+    previousYearMonth,
+    previousYearMonth,
+    previousYearMonth,
+  ]);
   const today = dayjs().startOf("day");
   const yearEnd = today.endOf("year").startOf("day");
 

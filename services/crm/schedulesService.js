@@ -88,6 +88,23 @@ const getScheduleByCoustomerId = async (id) => {
   const result = await sql.executeQuery(query, id);
   return result;
 };
+
+const getCustomerScheduleSummary = async (customerName) => {
+  const query = `
+    SELECT
+      COUNT(*) AS total,
+      COALESCE(SUM(CASE WHEN A.csKind = 1 THEN 1 ELSE 0 END), 0) AS simpleInquiry,
+      COALESCE(SUM(CASE WHEN A.csKind = 2 THEN 1 ELSE 0 END), 0) AS rent,
+      COALESCE(SUM(CASE WHEN A.csKind = 3 THEN 1 ELSE 0 END), 0) AS visit,
+      COALESCE(SUM(CASE WHEN A.csKind = 4 THEN 1 ELSE 0 END), 0) AS tentative,
+      COALESCE(SUM(CASE WHEN A.csKind = 5 THEN 1 ELSE 0 END), 0) AS other
+    FROM schedules A
+    INNER JOIN Customers B ON A.customerName = B.id
+    WHERE B.customerName = ?
+  `;
+  const result = await sql.executeQuery(query, [customerName]);
+  return result[0];
+};
 const getScheduleById = async (id) => {
   const query = `SELECT ${selectqueryinit} WHERE A.id = ?`;
   const result = await sql.executeQuery(query, id);
@@ -327,6 +344,7 @@ export default {
   deleteSchedule,
   updateCsKind,
   getcsByDate,
+  getCustomerScheduleSummary,
   Inint_csKind,
   getKoreanHolidays,
 };

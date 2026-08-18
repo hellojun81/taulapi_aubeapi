@@ -33,6 +33,9 @@ const getScheduleById = async (req, res) => {
         const NewId = req.query.id;
         result = await schedulesService.getScheduleByCoustomerId(NewId);
         break;
+      case "customer-summary":
+        result = await schedulesService.getCustomerScheduleSummary(customerName);
+        break;
       case "cs":
         result = await schedulesService.getcsByDate(startDate, endDate, customerName, csKind);
         break;
