@@ -105,6 +105,49 @@ const getCustomerScheduleSummary = async (customerName) => {
   const result = await sql.executeQuery(query, [customerName]);
   return result[0];
 };
+
+const getUnpaidRentals = async (startDate) => {
+  const query = `SELECT A.id,
+      B.customerName,
+      B.contactPerson,
+      B.phone AS contactTel,
+      A.start,
+      A.end,
+      A.startTime,
+      A.endTime,
+      A.estPrice,
+      A.etc,
+      COALESCE(A.moneyFinishNY, 0) AS moneyFinishNY,
+      (
+        SELECT COUNT(*)
+        FROM bank_transactions T
+        WHERE T.accIn > 0
+          AND T.memo LIKE CONCAT('%', DATE_FORMAT(A.start, '%Y-%m-%d'), '%')
+          AND T.memo LIKE CONCAT('%', B.customerName, '%')
+      ) AS depositCount,
+      (
+        SELECT COALESCE(SUM(T.accIn), 0)
+        FROM bank_transactions T
+        WHERE T.accIn > 0
+          AND T.memo LIKE CONCAT('%', DATE_FORMAT(A.start, '%Y-%m-%d'), '%')
+          AND T.memo LIKE CONCAT('%', B.customerName, '%')
+      ) AS depositedAmount,
+      (
+        SELECT GROUP_CONCAT(DISTINCT NULLIF(T.pay_type, '') ORDER BY T.pay_type SEPARATOR ', ')
+        FROM bank_transactions T
+        WHERE T.accIn > 0
+          AND T.memo LIKE CONCAT('%', DATE_FORMAT(A.start, '%Y-%m-%d'), '%')
+          AND T.memo LIKE CONCAT('%', B.customerName, '%')
+      ) AS depositTypes
+    FROM schedules A
+    INNER JOIN Customers B ON A.customerName = B.id
+    WHERE A.csKind = 2
+      AND A.start >= ?
+      AND COALESCE(A.moneyFinishNY, 0) <> 1
+    ORDER BY A.start DESC, B.customerName ASC
+  `;
+  return await sql.executeQuery(query, [startDate]);
+};
 const getScheduleById = async (id) => {
   const query = `SELECT ${selectqueryinit} WHERE A.id = ?`;
   const result = await sql.executeQuery(query, id);
@@ -345,6 +388,7 @@ export default {
   updateCsKind,
   getcsByDate,
   getCustomerScheduleSummary,
+  getUnpaidRentals,
   Inint_csKind,
   getKoreanHolidays,
 };

@@ -36,6 +36,9 @@ const getScheduleById = async (req, res) => {
       case "customer-summary":
         result = await schedulesService.getCustomerScheduleSummary(customerName);
         break;
+      case "unpaid-rentals":
+        result = await schedulesService.getUnpaidRentals(startDate);
+        break;
       case "cs":
         result = await schedulesService.getcsByDate(startDate, endDate, customerName, csKind);
         break;
