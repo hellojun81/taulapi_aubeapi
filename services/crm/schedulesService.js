@@ -144,6 +144,14 @@ const getUnpaidRentals = async (startDate) => {
     WHERE A.csKind = 2
       AND A.start >= ?
       AND COALESCE(A.moneyFinishNY, 0) <> 1
+      AND NOT EXISTS (
+        SELECT 1
+        FROM bank_transactions T
+        WHERE T.accIn > 0
+          AND TRIM(T.pay_type) = '잔금'
+          AND T.memo LIKE CONCAT('%', DATE_FORMAT(A.start, '%Y-%m-%d'), '%')
+          AND T.memo LIKE CONCAT('%', B.customerName, '%')
+      )
     ORDER BY A.start DESC, B.customerName ASC
   `;
   return await sql.executeQuery(query, [startDate]);
